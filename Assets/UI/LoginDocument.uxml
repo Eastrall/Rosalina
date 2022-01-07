@@ -4,4 +4,6 @@
     </ui:VisualElement>
     <ui:Toggle label="Toggle" />
     <ui:Button text="Button" display-tooltip-when-elided="true" />
+    <ui:VisualElement />
+    <ui:ScrollView scroll-deceleration-rate="0,135" elasticity="0,1" />
 </ui:UXML>

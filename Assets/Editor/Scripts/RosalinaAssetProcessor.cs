@@ -14,11 +14,9 @@ public class RosalinaAssetProcessor : AssetPostprocessor
 
         if (uiFilesChanged.Length > 0)
         {
-            var generator = new RosalinaGenerator();
-
             for (int i = 0; i < uiFilesChanged.Length; i++)
             {
-                generator.Generate(uiFilesChanged[i]);
+                RosalinaGenerator.Generate(uiFilesChanged[i]);
             }
         }
     }
