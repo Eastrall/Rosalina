@@ -15,6 +15,8 @@ public partial class LoginDocument : MonoBehaviour
 {
     [SerializeField]
     private UIDocument _document;
+    private Label _titleLabel;
+    private Button _button1;
     public VisualElement Root
     {
         get
@@ -25,5 +27,7 @@ public partial class LoginDocument : MonoBehaviour
 
     public void InitializeDocument()
     {
+        _titleLabel = (Label)Root.Q("TitleLabel");
+        _button1 = (Button)Root.Q("Button1");
     }
 }

@@ -2,7 +2,9 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -33,6 +35,71 @@ internal static class RosalinaGenerator
         string outputPath = Path.GetDirectoryName(uiDocumentPath);
         string className = Path.GetFileNameWithoutExtension(uiDocumentPath);
         string generatedCodeBehindFileName = Path.Combine(outputPath, $"{className}.g.cs");
+        UxmlNode uiDocumentRootNode = RosalinaUXMLParser.ParseUIDocument(uiDocumentPath);
+
+        var flatNodes = uiDocumentRootNode.Children
+            .SelectMany(x => x.Children)
+            .Where(c => c.HasName)
+            .Select(x => new UIPropertyDescriptor(x.Type, x.Name))
+            .ToList();
+
+        var documentVariable = CreateDocumentVariable();
+        var visualElementProperty = CreateVisualElementRootProperty();
+
+        var privateVariables = new List<MemberDeclarationSyntax>
+        {
+            documentVariable
+        };
+
+        var initializeMethodStatements = new List<StatementSyntax>();
+
+
+        foreach (UIPropertyDescriptor property in flatNodes)
+        {
+            var variableIdentifier = SyntaxFactory.IdentifierName(property.PrivateName);
+            var variable = CreateVariable(property.PrivateName, property.Type);
+            var field = SyntaxFactory.FieldDeclaration(variable)
+                .AddModifiers(SyntaxFactory.Token(SyntaxKind.PrivateKeyword));
+
+            privateVariables.Add(field);
+
+            var methodQ = SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                SyntaxFactory.IdentifierName("Root"),
+                SyntaxFactory.IdentifierName("Q")
+             );
+            var argument = SyntaxFactory.Argument(
+                SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(property.Name))
+            );
+            var argumentList = SyntaxFactory.SeparatedList(new[] { argument });
+
+            var cast = SyntaxFactory.CastExpression(
+                SyntaxFactory.ParseName(property.Type),
+                SyntaxFactory.InvocationExpression(methodQ, SyntaxFactory.ArgumentList(argumentList))
+            );
+
+            var assignment = SyntaxFactory.AssignmentExpression(
+                    SyntaxKind.SimpleAssignmentExpression,
+                    SyntaxFactory.IdentifierName(property.PrivateName),
+                    cast
+            );
+
+            initializeMethodStatements.Add(
+                SyntaxFactory.ExpressionStatement(
+                    assignment
+                )
+            );
+        }
+
+        var initializeMethod = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("void"), "InitializeDocument")
+            .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
+            .WithBody(SyntaxFactory.Block(initializeMethodStatements));
+
+        var members = new List<MemberDeclarationSyntax>(privateVariables)
+        {
+            visualElementProperty,
+            initializeMethod
+        };
 
         UsingDirectiveSyntax[] usings = GetDefaultUsingDirectives();
         ClassDeclarationSyntax @class = SyntaxFactory.ClassDeclaration(className)
@@ -41,11 +108,7 @@ internal static class RosalinaGenerator
             .AddBaseListTypes(
                 SyntaxFactory.SimpleBaseType(SyntaxFactory.ParseName(typeof(MonoBehaviour).Name))
             )
-            .AddMembers(
-                CreateDocumentVariable(),
-                CreateVisualElementRootProperty(),
-                CreateInitializeMethod()
-            );
+            .AddMembers(members.ToArray());
 
         var compilationUnit = SyntaxFactory.CompilationUnit()
             .AddUsings(usings)
@@ -88,7 +151,12 @@ internal static class RosalinaGenerator
 
     private static VariableDeclarationSyntax CreateVariable(string variableName, Type variableType)
     {
-        var variableTypeName = SyntaxFactory.ParseName(variableType.Name);
+        return CreateVariable(variableName, variableType.Name);
+    }
+
+    private static VariableDeclarationSyntax CreateVariable(string variableName, string variableType)
+    {
+        var variableTypeName = SyntaxFactory.ParseName(variableType);
         var documentVariableDeclaration = SyntaxFactory.VariableDeclaration(variableTypeName)
             .AddVariables(SyntaxFactory.VariableDeclarator(variableName));
 
@@ -112,7 +180,7 @@ internal static class RosalinaGenerator
         return property;
     }
 
-    private static MemberDeclarationSyntax CreateInitializeMethod()
+    private static MethodDeclarationSyntax CreateInitializeMethod()
     {
         var method = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("void"), "InitializeDocument")
             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
