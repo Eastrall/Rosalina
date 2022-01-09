@@ -15,4 +15,15 @@ public partial class LoginDocument : MonoBehaviour
 {
     [SerializeField]
     private UIDocument _document;
+    public VisualElement Root
+    {
+        get
+        {
+            return _document?.rootVisualElement;
+        }
+    }
+
+    public void InitializeDocument()
+    {
+    }
 }

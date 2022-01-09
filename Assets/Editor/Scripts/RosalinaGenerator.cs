@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -41,7 +42,9 @@ internal static class RosalinaGenerator
                 SyntaxFactory.SimpleBaseType(SyntaxFactory.ParseName(typeof(MonoBehaviour).Name))
             )
             .AddMembers(
-                GetDefaultMembers()
+                CreateDocumentVariable(),
+                CreateVisualElementRootProperty(),
+                CreateInitializeMethod()
             );
 
         var compilationUnit = SyntaxFactory.CompilationUnit()
@@ -67,11 +70,9 @@ internal static class RosalinaGenerator
         };
     }
 
-    private static MemberDeclarationSyntax[] GetDefaultMembers()
+    private static MemberDeclarationSyntax CreateDocumentVariable()
     {
-        var documentVariableType = SyntaxFactory.ParseName(typeof(UIDocument).Name);
-        var documentVariableDeclaration = SyntaxFactory.VariableDeclaration(documentVariableType)
-            .AddVariables(SyntaxFactory.VariableDeclarator("_document"));
+        var documentVariableDeclaration = CreateVariable("_document", typeof(UIDocument));
         var documentFieldDeclaration = SyntaxFactory.FieldDeclaration(documentVariableDeclaration)
             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PrivateKeyword))
             .AddAttributeLists(
@@ -82,10 +83,41 @@ internal static class RosalinaGenerator
                 )
             );
 
-        return new MemberDeclarationSyntax[]
-        {
-            documentFieldDeclaration,
-            documentFieldDeclaration
-        };
+        return documentFieldDeclaration;
+    }
+
+    private static VariableDeclarationSyntax CreateVariable(string variableName, Type variableType)
+    {
+        var variableTypeName = SyntaxFactory.ParseName(variableType.Name);
+        var documentVariableDeclaration = SyntaxFactory.VariableDeclaration(variableTypeName)
+            .AddVariables(SyntaxFactory.VariableDeclarator(variableName));
+
+        return documentVariableDeclaration;
+    }
+
+    private static MemberDeclarationSyntax CreateVisualElementRootProperty()
+    {
+        var propertyTypeName = SyntaxFactory.ParseName(typeof(VisualElement).Name);
+        var property = SyntaxFactory.PropertyDeclaration(propertyTypeName, "Root")
+            .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
+            .AddAccessorListAccessors(
+                SyntaxFactory.AccessorDeclaration(
+                    SyntaxKind.GetAccessorDeclaration,
+                    SyntaxFactory.Block(
+                        SyntaxFactory.ParseStatement("return _document?.rootVisualElement;")
+                    )
+                )
+            );
+
+        return property;
+    }
+
+    private static MemberDeclarationSyntax CreateInitializeMethod()
+    {
+        var method = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("void"), "InitializeDocument")
+            .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
+            .WithBody(SyntaxFactory.Block());
+
+        return method;
     }
 }
