@@ -13,7 +13,9 @@ Rosalina watches your changes related to all `*.uxml` files, parses its content 
 
 For now, Rosalina only generates the UI Document code based on the UI element names. You still need to create on your own the `GameObject` with a `UIDocument` component and then add the generated script.
 
-It is recommended to create a new `class` with the same name as the document you are creating that will hold the UI logic. If you UI document name is: `MenuDocument`, Rosalina will create a `MenuDocument.g.cs`, and you'll need to create a `MenuDocument.cs` and make it `partial` so it can share the elements with the generated code.
+It is recommended to create a new `class` with the same name as the document you are creating that will hold the UI logic. 
+
+If you UI document name is: `MenuDocument`, Rosalina will create a `MenuDocument.g.cs`, and you'll need to create a `MenuDocument.cs` and make it `partial` so it can share the elements with the generated code.
 Finally, call the `InitializeDocument()` method in the `Awake()` hook, to initialize the UI properties.
 
 ```csharp
