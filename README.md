@@ -7,7 +7,7 @@ Rosalina watches your changes related to all `*.uxml` files, parses its content 
 
 ![alt](https://github.com/Eastrall/Rosalina/blob/main/docs/rosalina-code-gen.png?raw=true)
 
-![alt](https://gyazo.com/291ca8702846fcff5c2a53ba4c766536)
+![alt](https://i.gyazo.com/291ca8702846fcff5c2a53ba4c766536.gif)
 
 ## Known limitations
 
