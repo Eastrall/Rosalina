@@ -31,6 +31,7 @@ public class RosalinaAssetProcessor : AssetPostprocessor
 
             Debug.Log($"[Rosalina]: Done.");
             EditorUtility.ClearProgressBar();
+            AssetDatabase.Refresh();
         }
     }
 

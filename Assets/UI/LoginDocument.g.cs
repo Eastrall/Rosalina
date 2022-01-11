@@ -17,7 +17,7 @@ public partial class LoginDocument : MonoBehaviour
     private UIDocument _document;
     private Label _titleLabel;
     private Button _button1;
-    private Toggle _checkboxTogglee;
+    private Toggle _checkboxToggle;
     public VisualElement Root
     {
         get
@@ -30,6 +30,6 @@ public partial class LoginDocument : MonoBehaviour
     {
         _titleLabel = (Label)Root?.Q("TitleLabel");
         _button1 = (Button)Root?.Q("Button1");
-        _checkboxTogglee = (Toggle)Root?.Q("CheckboxTogglee");
+        _checkboxToggle = (Toggle)Root?.Q("CheckboxToggle");
     }
 }
