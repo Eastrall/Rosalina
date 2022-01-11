@@ -48,48 +48,40 @@ internal static class RosalinaGenerator
 
         var documentVariable = CreateDocumentVariable();
         var visualElementProperty = CreateVisualElementRootProperty();
+        var initializeMethodStatements = new List<StatementSyntax>();
         var privateVariables = new List<MemberDeclarationSyntax>
         {
             documentVariable
         };
-        var initializeMethodStatements = new List<StatementSyntax>();
+        var documentQueryMethodAccess = CreateRootQueryMethodAccessor();
 
         foreach (UIPropertyDescriptor property in namedNodes)
         {
-            var variableIdentifier = SyntaxFactory.IdentifierName(property.PrivateName);
-            var variable = CreateVariable(property.PrivateName, property.Type);
-            var field = SyntaxFactory.FieldDeclaration(variable)
-                .AddModifiers(SyntaxFactory.Token(SyntaxKind.PrivateKeyword));
+            FieldDeclarationSyntax field = CreateField(property.Type, property.PrivateName, SyntaxKind.PrivateKeyword);
 
             privateVariables.Add(field);
 
-            var methodQ = SyntaxFactory.MemberAccessExpression(
-                SyntaxKind.SimpleMemberAccessExpression,
-                SyntaxFactory.IdentifierName("Root?"),
-                SyntaxFactory.Token(SyntaxKind.DotToken),
-                SyntaxFactory.IdentifierName("Q")
-             );
-            var argument = SyntaxFactory.Argument(
-                SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(property.Name))
-            );
-            var argumentList = SyntaxFactory.SeparatedList(new[] { argument });
-
+            var argumentList = SyntaxFactory.SeparatedList(new[]
+            { 
+                SyntaxFactory.Argument(
+                    SyntaxFactory.LiteralExpression(
+                        SyntaxKind.StringLiteralExpression, 
+                        SyntaxFactory.Literal(property.Name)
+                    )
+                )
+            });
             var cast = SyntaxFactory.CastExpression(
                 SyntaxFactory.ParseName(property.Type),
-                SyntaxFactory.InvocationExpression(methodQ, SyntaxFactory.ArgumentList(argumentList))
+                SyntaxFactory.InvocationExpression(documentQueryMethodAccess, SyntaxFactory.ArgumentList(argumentList))
             );
-
             var assignment = SyntaxFactory.AssignmentExpression(
                     SyntaxKind.SimpleAssignmentExpression,
                     SyntaxFactory.IdentifierName(property.PrivateName),
                     cast
             );
+            var statement = SyntaxFactory.ExpressionStatement(assignment);
 
-            initializeMethodStatements.Add(
-                SyntaxFactory.ExpressionStatement(
-                    assignment
-                )
-            );
+            initializeMethodStatements.Add(statement);
         }
 
         var initializeMethod = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("void"), "InitializeDocument")
@@ -166,18 +158,14 @@ internal static class RosalinaGenerator
             );
     }
 
-    private static VariableDeclarationSyntax CreateVariable(string variableName, Type variableType)
+    private static MemberAccessExpressionSyntax CreateRootQueryMethodAccessor()
     {
-        return CreateVariable(variableName, variableType.Name);
-    }
-
-    private static VariableDeclarationSyntax CreateVariable(string variableName, string variableType)
-    {
-        var variableTypeName = SyntaxFactory.ParseName(variableType);
-        var documentVariableDeclaration = SyntaxFactory.VariableDeclaration(variableTypeName)
-            .AddVariables(SyntaxFactory.VariableDeclarator(variableName));
-
-        return documentVariableDeclaration;
+        return SyntaxFactory.MemberAccessExpression(
+            SyntaxKind.SimpleMemberAccessExpression,
+            SyntaxFactory.IdentifierName("Root?"),
+            SyntaxFactory.Token(SyntaxKind.DotToken),
+            SyntaxFactory.IdentifierName("Q")
+        );
     }
 
     private static FieldDeclarationSyntax CreateField(string fieldType, string fieldName, params SyntaxKind[] modifiers)
