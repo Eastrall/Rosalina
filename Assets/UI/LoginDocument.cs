@@ -1,6 +1,6 @@
 public partial class LoginDocument 
 {
-    private void Awake()
+    private void OnEnable()
     {
         InitializeDocument();
         _button1.clicked += OnButtonClick;

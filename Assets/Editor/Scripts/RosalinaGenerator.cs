@@ -27,34 +27,34 @@ internal static class RosalinaGenerator
     /// Generates the UI document code behind.
     /// </summary>
     /// <param name="uiDocumentPath">UI Document path.</param>
-    public static void Generate(string uiDocumentPath)
+    public static void Generate(UIDocumentAsset document)
     {
-        Debug.Log($"Generating UI code behind for {uiDocumentPath}");
-        EditorUtility.DisplayProgressBar("Generating UI code behind", "Working...", 25);
-
-        string outputPath = Path.GetDirectoryName(uiDocumentPath);
-        string className = Path.GetFileNameWithoutExtension(uiDocumentPath);
-        string generatedCodeBehindFileName = Path.Combine(outputPath, $"{className}.g.cs");
-        UxmlNode uiDocumentRootNode = RosalinaUXMLParser.ParseUIDocument(uiDocumentPath);
-
-        var flatNodes = uiDocumentRootNode.Children
-            .SelectMany(x => x.Children)
-            .Where(c => c.HasName)
+        // Parse document
+        UxmlNode uiDocumentRootNode = RosalinaUXMLParser.ParseUIDocument(document.FullPath);
+        var namedNodes = uiDocumentRootNode.Children.FlattenTree(x => x.Children)
+            .Where(x => x.HasName)
             .Select(x => new UIPropertyDescriptor(x.Type, x.Name))
             .ToList();
 
+        // Start code generation.
+        // 1. Create document variable
+        // 2. Create VisualElementRoot
+        // 3. Create variable and property for every nodes in the document
+        // 4. Create the class
+        // 5. Add required usings
+        // 6. Build compilation unit
+        // 7. Add class, usings and properties to compilation unit
+        // 8. Generate code.
+
         var documentVariable = CreateDocumentVariable();
         var visualElementProperty = CreateVisualElementRootProperty();
-
         var privateVariables = new List<MemberDeclarationSyntax>
         {
             documentVariable
         };
-
         var initializeMethodStatements = new List<StatementSyntax>();
 
-
-        foreach (UIPropertyDescriptor property in flatNodes)
+        foreach (UIPropertyDescriptor property in namedNodes)
         {
             var variableIdentifier = SyntaxFactory.IdentifierName(property.PrivateName);
             var variable = CreateVariable(property.PrivateName, property.Type);
@@ -65,7 +65,8 @@ internal static class RosalinaGenerator
 
             var methodQ = SyntaxFactory.MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression,
-                SyntaxFactory.IdentifierName("Root"),
+                SyntaxFactory.IdentifierName("Root?"),
+                SyntaxFactory.Token(SyntaxKind.DotToken),
                 SyntaxFactory.IdentifierName("Q")
              );
             var argument = SyntaxFactory.Argument(
@@ -102,7 +103,7 @@ internal static class RosalinaGenerator
         };
 
         UsingDirectiveSyntax[] usings = GetDefaultUsingDirectives();
-        ClassDeclarationSyntax @class = SyntaxFactory.ClassDeclaration(className)
+        ClassDeclarationSyntax @class = SyntaxFactory.ClassDeclaration(document.Name)
             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PartialKeyword))
             .AddBaseListTypes(
@@ -119,9 +120,7 @@ internal static class RosalinaGenerator
             .ToFullString();
         string generatedCode = GeneratedCodeHeader + code;
 
-        File.WriteAllText(generatedCodeBehindFileName, generatedCode);
-        EditorUtility.ClearProgressBar();
-        Debug.Log($"Done generating: {generatedCodeBehindFileName}");
+        File.WriteAllText(document.GeneratedFileOutputPath, generatedCode);
     }
 
     private static UsingDirectiveSyntax[] GetDefaultUsingDirectives()
@@ -135,9 +134,7 @@ internal static class RosalinaGenerator
 
     private static MemberDeclarationSyntax CreateDocumentVariable()
     {
-        var documentVariableDeclaration = CreateVariable("_document", typeof(UIDocument));
-        var documentFieldDeclaration = SyntaxFactory.FieldDeclaration(documentVariableDeclaration)
-            .AddModifiers(SyntaxFactory.Token(SyntaxKind.PrivateKeyword))
+        FieldDeclarationSyntax documentField = CreateField(typeof(UIDocument).Name, "_document", SyntaxKind.PrivateKeyword)
             .AddAttributeLists(
                 SyntaxFactory.AttributeList(
                     SyntaxFactory.SingletonSeparatedList(
@@ -146,7 +143,27 @@ internal static class RosalinaGenerator
                 )
             );
 
-        return documentFieldDeclaration;
+        return documentField;
+    }
+
+    private static MemberDeclarationSyntax CreateVisualElementRootProperty()
+    {
+        return CreateProperty(typeof(VisualElement).Name, "Root", SyntaxKind.PublicKeyword)
+            .AddAccessorListAccessors(
+                SyntaxFactory.AccessorDeclaration(
+                    SyntaxKind.GetAccessorDeclaration,
+                    SyntaxFactory.Block(
+                        SyntaxFactory.ReturnStatement(
+                            SyntaxFactory.Token(SyntaxKind.ReturnKeyword),
+                            SyntaxFactory.MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                SyntaxFactory.IdentifierName("_document?"),
+                                SyntaxFactory.IdentifierName("rootVisualElement")),
+                            SyntaxFactory.Token(SyntaxKind.SemicolonToken)
+                        )
+                    )
+                )
+            );
     }
 
     private static VariableDeclarationSyntax CreateVariable(string variableName, Type variableType)
@@ -163,29 +180,29 @@ internal static class RosalinaGenerator
         return documentVariableDeclaration;
     }
 
-    private static MemberDeclarationSyntax CreateVisualElementRootProperty()
+    private static FieldDeclarationSyntax CreateField(string fieldType, string fieldName, params SyntaxKind[] modifiers)
     {
-        var propertyTypeName = SyntaxFactory.ParseName(typeof(VisualElement).Name);
-        var property = SyntaxFactory.PropertyDeclaration(propertyTypeName, "Root")
-            .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
-            .AddAccessorListAccessors(
-                SyntaxFactory.AccessorDeclaration(
-                    SyntaxKind.GetAccessorDeclaration,
-                    SyntaxFactory.Block(
-                        SyntaxFactory.ParseStatement("return _document?.rootVisualElement;")
-                    )
-                )
-            );
+        SyntaxToken[] fieldModifiers = modifiers.Select(x => SyntaxFactory.Token(x)).ToArray();
+        NameSyntax variableTypeName = SyntaxFactory.ParseName(fieldType);
+        VariableDeclarationSyntax variableSyntax = SyntaxFactory.VariableDeclaration(variableTypeName)
+            .AddVariables(SyntaxFactory.VariableDeclarator(fieldName));
+
+        return SyntaxFactory.FieldDeclaration(variableSyntax)
+            .AddModifiers(fieldModifiers);
+    }
+
+    private static PropertyDeclarationSyntax CreateProperty(string propertyType, string propertyName, params SyntaxKind[] modifiers)
+    {
+        SyntaxToken[] propertyModifiers = modifiers.Select(x => SyntaxFactory.Token(x)).ToArray();
+        NameSyntax propertyTypeName = SyntaxFactory.ParseName(propertyType);
+        PropertyDeclarationSyntax property = SyntaxFactory.PropertyDeclaration(propertyTypeName, propertyName)
+            .AddModifiers(propertyModifiers);
 
         return property;
     }
 
-    private static MethodDeclarationSyntax CreateInitializeMethod()
+    private static IEnumerable<TValue> FlattenTree<TValue>(this IEnumerable<TValue> source, Func<TValue, IEnumerable<TValue>> selector)
     {
-        var method = SyntaxFactory.MethodDeclaration(SyntaxFactory.ParseTypeName("void"), "InitializeDocument")
-            .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
-            .WithBody(SyntaxFactory.Block());
-
-        return method;
+        return source.SelectMany(x => selector(x).FlattenTree(selector)).Concat(source);
     }
 }

@@ -3,4 +3,6 @@
         <ui:Label text="Label" name="TitleLabel" />
         <ui:Button text="Button" name="Button1" />
     </ui:VisualElement>
+    <ui:Toggle label="Toggle" name="CheckboxTogglee" />
+    <ui:Button text="Button" display-tooltip-when-elided="true" />
 </ui:UXML>
