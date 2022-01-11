@@ -16,17 +16,19 @@ For now, Rosalina only generates the UI Document code based on the UI element na
 It is recommended to create a new `class` with the same name as the document you are creating that will hold the UI logic. 
 
 If you UI document name is: `MenuDocument`, Rosalina will create a `MenuDocument.g.cs`, and you'll need to create a `MenuDocument.cs` and make it `partial` so it can share the elements with the generated code.
-Finally, call the `InitializeDocument()` method in the `Awake()` hook, to initialize the UI properties.
+Finally, call the `InitializeDocument()` method in the `OnEnable()` hook, to initialize the UI properties.
 
 ```csharp
 public partial class MenuDocument
 {
-    private void Awake()
+    private void OnEnable()
     {
         InitializeDocument(); // Very important!
     }
 }
 ```
+
+> Note: Always call the `InitializeDocument()` method in the `OnEnable()` hook because the document's Visual Tree is instanciated at that moment.
 
 ## Final words
 
