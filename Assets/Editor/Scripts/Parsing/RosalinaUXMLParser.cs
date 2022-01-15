@@ -9,13 +9,14 @@ internal class RosalinaUXMLParser
     /// Parses the given UI document path.
     /// </summary>
     /// <param name="uiDocumentPath">UI Document path.</param>
-    /// <returns>The UXML root node.</returns>
-    public static UxmlNode ParseUIDocument(string uiDocumentPath)
+    /// <returns>The UXML document.</returns>
+    public static UxmlDocument ParseUIDocument(string uiDocumentPath)
     {
         using FileStream documentStream = File.OpenRead(uiDocumentPath);
         XElement root = XElement.Load(documentStream);
+        UxmlNode rootNode = ParseUxmlNode(root);
 
-        return ParseUxmlNode(root);
+        return new UxmlDocument(Path.GetFileName(uiDocumentPath), uiDocumentPath, rootNode);
     }
 
     private static UxmlNode ParseUxmlNode(XElement xmlNode)

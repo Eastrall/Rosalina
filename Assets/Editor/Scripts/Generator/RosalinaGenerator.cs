@@ -1,5 +1,4 @@
-﻿using Assets.Editor.Scripts.Generator.Extensions;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -41,18 +40,11 @@ internal static class RosalinaGenerator
     /// <param name="uiDocumentPath">UI Document path.</param>
     public static void Generate(UIDocumentAsset document)
     {
-        // Parse document
-        UxmlNode uiDocumentRootNode = RosalinaUXMLParser.ParseUIDocument(document.FullPath);
-        IEnumerable<UIPropertyDescriptor> namedNodes = uiDocumentRootNode.Children
-            .FlattenTree(x => x.Children)
-            .Where(x => x.HasName)
-            .Select(x => new UIPropertyDescriptor(x.Type, x.Name))
-            .ToList();
-
+        UxmlDocument uxmlDocument = RosalinaUXMLParser.ParseUIDocument(document.FullPath);
+     
         MemberDeclarationSyntax documentVariable = CreateDocumentVariable();
         MemberDeclarationSyntax visualElementProperty = CreateVisualElementRootProperty();
-
-        InitializationStatement[] statements = GenerateInitializeStatements(namedNodes);
+        InitializationStatement[] statements = GenerateInitializeStatements(uxmlDocument);
         FieldDeclarationSyntax[] privateFieldsStatements = statements.Select(x => x.PrivateField).ToArray();
         StatementSyntax[] initializationStatements = statements.Select(x => x.Statement).ToArray();
 
@@ -135,19 +127,21 @@ internal static class RosalinaGenerator
         );
     }
 
-    private static InitializationStatement[] GenerateInitializeStatements(IEnumerable<UIPropertyDescriptor> properties)
+    private static InitializationStatement[] GenerateInitializeStatements(UxmlDocument uxmlDocument)
     {
-        var documentQueryMethodAccess = CreateRootQueryMethodAccessor();
         var statements = new List<InitializationStatement>();
+        MemberAccessExpressionSyntax documentQueryMethodAccess = CreateRootQueryMethodAccessor();
+        IEnumerable<UxmlNode> childNodes = uxmlDocument.GetChildren();
 
-        foreach (var property in properties)
+        foreach (var node in childNodes)
         {
+            var property = new UIPropertyDescriptor(node.Type, node.Name);
             string fieldName = property.PrivateName;
             Type uiPropertyType = UIPropertyTypes.GetUIElementType(property.Type);
 
             if (uiPropertyType is null)
             {
-                Debug.LogWarning($"[Rosalina]: Failed to get property type: '{property.Type}' field: '{property.Name}'. Property will be ignored.");
+                Debug.LogWarning($"[Rosalina]: Failed to get property type: '{property.Type}', field: '{property.Name}' for document '{uxmlDocument.Path}'. Property will be ignored.");
                 continue;
             }
 
