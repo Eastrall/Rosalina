@@ -29,6 +29,11 @@ internal static class RosalinaGenerator
     private const string RootVisualElementPropertyName = "Root";
     private const string RootVisualElementQueryMethodName = "Q";
     private const string InitializeDocumentMethodName = "InitializeDocument";
+    private static readonly UsingDirectiveSyntax[] DefaultUsings = new UsingDirectiveSyntax[]
+    {
+        SyntaxFactory.UsingDirective(SyntaxFactory.IdentifierName("UnityEngine")),
+        SyntaxFactory.UsingDirective(SyntaxFactory.IdentifierName("UnityEngine.UIElements"))
+    };
 
     /// <summary>
     /// Generates the UI document code behind.
@@ -60,7 +65,6 @@ internal static class RosalinaGenerator
             .Append(initializeMethod)
             .ToArray();
 
-        UsingDirectiveSyntax[] usings = GetDefaultUsingDirectives();
         ClassDeclarationSyntax @class = SyntaxFactory.ClassDeclaration(document.Name)
             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PartialKeyword))
@@ -70,7 +74,7 @@ internal static class RosalinaGenerator
             .AddMembers(classMembers);
 
         CompilationUnitSyntax compilationUnit = SyntaxFactory.CompilationUnit()
-            .AddUsings(usings)
+            .AddUsings(DefaultUsings)
             .AddMembers(@class);
 
         string code = compilationUnit
@@ -79,15 +83,6 @@ internal static class RosalinaGenerator
         string generatedCode = GeneratedCodeHeader + code;
 
         File.WriteAllText(document.GeneratedFileOutputPath, generatedCode);
-    }
-
-    private static UsingDirectiveSyntax[] GetDefaultUsingDirectives()
-    {
-        return new UsingDirectiveSyntax[]
-        {
-            SyntaxFactory.UsingDirective(SyntaxFactory.IdentifierName("UnityEngine")),
-            SyntaxFactory.UsingDirective(SyntaxFactory.IdentifierName("UnityEngine.UIElements"))
-        };
     }
 
     private static MemberDeclarationSyntax CreateDocumentVariable()

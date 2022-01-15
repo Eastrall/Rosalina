@@ -6,4 +6,5 @@
     <ui:Toggle label="Toggle" name="CheckboxToggle" />
     <ui:Button text="Button" display-tooltip-when-elided="true" name="Button5" />
     <ui:VisualElement name="name" />
+    <ui:ScrollView scroll-deceleration-rate="0,135" elasticity="0,1" />
 </ui:UXML>

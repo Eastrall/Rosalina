@@ -2,8 +2,8 @@ public partial class LoginDocument
 {
     private void OnEnable()
     {
-        //InitializeDocument();
-        //_button1.clicked += OnButtonClick;
+        InitializeDocument();
+        _button1.clicked += OnButtonClick;
     }
 
     private void OnButtonClick()

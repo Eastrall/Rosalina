@@ -16,6 +16,10 @@ public partial class LoginDocument : MonoBehaviour
     [SerializeField]
     private UIDocument _document;
     private Label _titleLabel;
+    private Button _button1;
+    private Toggle _checkboxToggle;
+    private Button _button5;
+    private VisualElement _name;
     public VisualElement Root
     {
         get
@@ -27,5 +31,9 @@ public partial class LoginDocument : MonoBehaviour
     public void InitializeDocument()
     {
         _titleLabel = (Label)Root?.Q("TitleLabel");
+        _button1 = (Button)Root?.Q("Button1");
+        _checkboxToggle = (Toggle)Root?.Q("CheckboxToggle");
+        _button5 = (Button)Root?.Q("Button5");
+        _name = (VisualElement)Root?.Q("name");
     }
 }
