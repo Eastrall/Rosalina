@@ -1,12 +1,15 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 using System.Xml.Linq;
 
 internal class RosalinaUXMLParser
 {
+    private const string NameAttribute = "name";
+
+    /// <summary>
+    /// Parses the given UI document path.
+    /// </summary>
+    /// <param name="uiDocumentPath">UI Document path.</param>
+    /// <returns>The UXML root node.</returns>
     public static UxmlNode ParseUIDocument(string uiDocumentPath)
     {
         using FileStream documentStream = File.OpenRead(uiDocumentPath);
@@ -18,9 +21,8 @@ internal class RosalinaUXMLParser
     private static UxmlNode ParseUxmlNode(XElement xmlNode)
     {
         string type = xmlNode.Name.LocalName;
-        string name = xmlNode.Attribute("name")?.Value ?? string.Empty;
-
-        UxmlNode node = new(type, name, xmlNode.Parent is null);
+        string name = xmlNode.Attribute(NameAttribute)?.Value ?? string.Empty;
+        var node = new UxmlNode(type, name, xmlNode.Parent is null);
 
         if (xmlNode.HasElements)
         {

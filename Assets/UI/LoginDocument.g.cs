@@ -18,6 +18,8 @@ public partial class LoginDocument : MonoBehaviour
     private Label _titleLabel;
     private Button _button1;
     private Toggle _checkboxToggle;
+    private Button _button2;
+    private VisualElement _name;
     public VisualElement Root
     {
         get
@@ -31,5 +33,7 @@ public partial class LoginDocument : MonoBehaviour
         _titleLabel = (Label)Root?.Q("TitleLabel");
         _button1 = (Button)Root?.Q("Button1");
         _checkboxToggle = (Toggle)Root?.Q("CheckboxToggle");
+        _button2 = (Button)Root?.Q("Button2");
+        _name = (VisualElement)Root?.Q("name");
     }
 }

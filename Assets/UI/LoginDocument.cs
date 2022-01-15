@@ -2,7 +2,7 @@ public partial class LoginDocument
 {
     private void OnEnable()
     {
-        InitializeDocument();
+        //InitializeDocument();
         _button1.clicked += OnButtonClick;
     }
 
