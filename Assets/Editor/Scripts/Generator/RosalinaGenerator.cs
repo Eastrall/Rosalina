@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -24,7 +25,9 @@ internal static class RosalinaGenerator
 ";
 
     private const string DocumentFieldName = "_document";
+    private const string DocumentRootVisualElementFieldName = "rootVisualElement";
     private const string RootVisualElementPropertyName = "Root";
+    private const string RootVisualElementQueryMethodName = "Q";
     private const string InitializeDocumentMethodName = "InitializeDocument";
 
     /// <summary>
@@ -48,7 +51,7 @@ internal static class RosalinaGenerator
         FieldDeclarationSyntax[] privateFieldsStatements = statements.Select(x => x.PrivateField).ToArray();
         StatementSyntax[] initializationStatements = statements.Select(x => x.Statement).ToArray();
 
-        MethodDeclarationSyntax initializeMethod = GenerateInitializeMethod()
+        MethodDeclarationSyntax initializeMethod = RosalinaSyntaxFactory.CreateMethod("void", InitializeDocumentMethodName, SyntaxKind.PublicKeyword)
             .WithBody(SyntaxFactory.Block(initializationStatements));
 
         MemberDeclarationSyntax[] classMembers = new[] { documentVariable }
@@ -90,12 +93,13 @@ internal static class RosalinaGenerator
     private static MemberDeclarationSyntax CreateDocumentVariable()
     {
         string documentPropertyTypeName = typeof(UIDocument).Name;
+        NameSyntax serializeFieldName = SyntaxFactory.ParseName(typeof(SerializeField).Name);
 
         FieldDeclarationSyntax documentField = RosalinaSyntaxFactory.CreateField(documentPropertyTypeName, DocumentFieldName, SyntaxKind.PrivateKeyword)
             .AddAttributeLists(
                 SyntaxFactory.AttributeList(
                     SyntaxFactory.SingletonSeparatedList(
-                        SyntaxFactory.Attribute(SyntaxFactory.ParseName(typeof(SerializeField).Name))
+                        SyntaxFactory.Attribute(serializeFieldName)
                     )
                 )
             );
@@ -107,7 +111,6 @@ internal static class RosalinaGenerator
     {
         string propertyTypeName = typeof(VisualElement).Name;
         string documentFieldName = $"{DocumentFieldName}?";
-        const string documentRootVisualElementPropertyName = "rootVisualElement";
 
         return RosalinaSyntaxFactory.CreateProperty(propertyTypeName, RootVisualElementPropertyName, SyntaxKind.PublicKeyword)
             .AddAccessorListAccessors(
@@ -119,7 +122,7 @@ internal static class RosalinaGenerator
                             SyntaxFactory.MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
                                 SyntaxFactory.IdentifierName(documentFieldName),
-                                SyntaxFactory.IdentifierName(documentRootVisualElementPropertyName)),
+                                SyntaxFactory.IdentifierName(DocumentRootVisualElementFieldName)),
                             SyntaxFactory.Token(SyntaxKind.SemicolonToken)
                         )
                     )
@@ -129,27 +132,12 @@ internal static class RosalinaGenerator
 
     private static MemberAccessExpressionSyntax CreateRootQueryMethodAccessor()
     {
-        string propertyName = $"{RootVisualElementPropertyName}?";
-        const string queryMethodName = "Q";
-
         return SyntaxFactory.MemberAccessExpression(
             SyntaxKind.SimpleMemberAccessExpression,
-            SyntaxFactory.IdentifierName(propertyName),
+            SyntaxFactory.IdentifierName($"{RootVisualElementPropertyName}?"),
             SyntaxFactory.Token(SyntaxKind.DotToken),
-            SyntaxFactory.IdentifierName(queryMethodName)
+            SyntaxFactory.IdentifierName(RootVisualElementQueryMethodName)
         );
-    }
-
-    private static MethodDeclarationSyntax GenerateInitializeMethod()
-    {
-        SyntaxToken methodModifier = SyntaxFactory.Token(SyntaxKind.PublicKeyword);
-        TypeSyntax methodReturnType = SyntaxFactory.ParseTypeName("void");
-
-        MethodDeclarationSyntax initializeMethod = SyntaxFactory
-            .MethodDeclaration(methodReturnType, InitializeDocumentMethodName)
-            .AddModifiers(methodModifier);
-
-        return initializeMethod;
     }
 
     private static InitializationStatement[] GenerateInitializeStatements(IEnumerable<UIPropertyDescriptor> properties)
@@ -159,7 +147,16 @@ internal static class RosalinaGenerator
 
         foreach (var property in properties)
         {
-            FieldDeclarationSyntax field = RosalinaSyntaxFactory.CreateField(property.Type, property.PrivateName, SyntaxKind.PrivateKeyword);
+            string fieldName = property.PrivateName;
+            Type uiPropertyType = UIPropertyTypes.GetUIElementType(property.Type);
+
+            if (uiPropertyType is null)
+            {
+                Debug.LogWarning($"[Rosalina]: Failed to get property type: '{property.Type}' field: '{property.Name}'. Property will be ignored.");
+                continue;
+            }
+
+            FieldDeclarationSyntax field = RosalinaSyntaxFactory.CreateField(uiPropertyType.Name, fieldName, SyntaxKind.PrivateKeyword);
 
             var argumentList = SyntaxFactory.SeparatedList(new[]
             {
@@ -171,13 +168,13 @@ internal static class RosalinaGenerator
                 )
             });
             var cast = SyntaxFactory.CastExpression(
-                SyntaxFactory.ParseName(property.Type),
+                SyntaxFactory.ParseTypeName(uiPropertyType.Name),
                 SyntaxFactory.InvocationExpression(documentQueryMethodAccess, SyntaxFactory.ArgumentList(argumentList))
             );
             var statement = SyntaxFactory.ExpressionStatement(
                 SyntaxFactory.AssignmentExpression(
                     SyntaxKind.SimpleAssignmentExpression,
-                    SyntaxFactory.IdentifierName(property.PrivateName),
+                    SyntaxFactory.IdentifierName(fieldName),
                     cast
                 )
             );
