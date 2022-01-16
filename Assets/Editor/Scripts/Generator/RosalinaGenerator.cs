@@ -45,14 +45,13 @@ internal static class RosalinaGenerator
         MemberDeclarationSyntax documentVariable = CreateDocumentVariable();
         MemberDeclarationSyntax visualElementProperty = CreateVisualElementRootProperty();
         InitializationStatement[] statements = GenerateInitializeStatements(uxmlDocument);
-        FieldDeclarationSyntax[] privateFieldsStatements = statements.Select(x => x.PrivateField).ToArray();
+        PropertyDeclarationSyntax[] propertyStatements = statements.Select(x => x.Property).ToArray();
         StatementSyntax[] initializationStatements = statements.Select(x => x.Statement).ToArray();
 
         MethodDeclarationSyntax initializeMethod = RosalinaSyntaxFactory.CreateMethod("void", InitializeDocumentMethodName, SyntaxKind.PublicKeyword)
             .WithBody(SyntaxFactory.Block(initializationStatements));
 
-        MemberDeclarationSyntax[] classMembers = new[] { documentVariable }
-            .Concat(privateFieldsStatements)
+        MemberDeclarationSyntax[] classMembers = propertyStatements
             .Append(visualElementProperty)
             .Append(initializeMethod)
             .ToArray();
@@ -63,6 +62,7 @@ internal static class RosalinaGenerator
             .AddBaseListTypes(
                 SyntaxFactory.SimpleBaseType(SyntaxFactory.ParseName(typeof(MonoBehaviour).Name))
             )
+            .AddMembers(documentVariable)
             .AddMembers(classMembers);
 
         CompilationUnitSyntax compilationUnit = SyntaxFactory.CompilationUnit()
@@ -135,24 +135,32 @@ internal static class RosalinaGenerator
 
         foreach (var node in childNodes)
         {
-            var property = new UIPropertyDescriptor(node.Type, node.Name);
-            string fieldName = property.PrivateName;
-            Type uiPropertyType = UIPropertyTypes.GetUIElementType(property.Type);
+            var uiProperty = new UIPropertyDescriptor(node.Type, node.Name);
+            Type uiPropertyType = UIPropertyTypes.GetUIElementType(uiProperty.Type);
 
             if (uiPropertyType is null)
             {
-                Debug.LogWarning($"[Rosalina]: Failed to get property type: '{property.Type}', field: '{property.Name}' for document '{uxmlDocument.Path}'. Property will be ignored.");
+                Debug.LogWarning($"[Rosalina]: Failed to get property type: '{uiProperty.Type}', field: '{uiProperty.Name}' for document '{uxmlDocument.Path}'. Property will be ignored.");
                 continue;
             }
 
-            FieldDeclarationSyntax field = RosalinaSyntaxFactory.CreateField(uiPropertyType.Name, fieldName, SyntaxKind.PrivateKeyword);
-
+            PropertyDeclarationSyntax @property = RosalinaSyntaxFactory.CreateProperty(uiPropertyType.Name, uiProperty.Name, SyntaxKind.PublicKeyword)
+                .AddAccessorListAccessors(
+                    SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
+                        .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))
+                )
+                .AddAccessorListAccessors(
+                    SyntaxFactory.AccessorDeclaration(SyntaxKind.SetAccessorDeclaration)
+                        .AddModifiers(SyntaxFactory.Token(SyntaxKind.PrivateKeyword))
+                        .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))
+                );
+            
             var argumentList = SyntaxFactory.SeparatedList(new[]
             {
                 SyntaxFactory.Argument(
                     SyntaxFactory.LiteralExpression(
                         SyntaxKind.StringLiteralExpression,
-                        SyntaxFactory.Literal(property.Name)
+                        SyntaxFactory.Literal(uiProperty.Name)
                     )
                 )
             });
@@ -163,12 +171,12 @@ internal static class RosalinaGenerator
             var statement = SyntaxFactory.ExpressionStatement(
                 SyntaxFactory.AssignmentExpression(
                     SyntaxKind.SimpleAssignmentExpression,
-                    SyntaxFactory.IdentifierName(fieldName),
+                    SyntaxFactory.IdentifierName(uiProperty.Name),
                     cast
                 )
             );
 
-            statements.Add(new InitializationStatement(statement, field));
+            statements.Add(new InitializationStatement(statement, property));
         }
 
         return statements.ToArray();
@@ -178,12 +186,12 @@ internal static class RosalinaGenerator
     {
         public StatementSyntax Statement { get; }
 
-        public FieldDeclarationSyntax PrivateField { get; }
+        public PropertyDeclarationSyntax Property { get; }
 
-        public InitializationStatement(StatementSyntax statement, FieldDeclarationSyntax privateField)
+        public InitializationStatement(StatementSyntax statement, PropertyDeclarationSyntax property)
         {
             Statement = statement;
-            PrivateField = privateField;
+            Property = property;
         }
     }
 }

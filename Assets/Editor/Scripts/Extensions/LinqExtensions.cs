@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Assets.Editor.Scripts.Generator.Extensions
+namespace Rosalina.Extensions
 {
     internal static class LinqExtensions
     {

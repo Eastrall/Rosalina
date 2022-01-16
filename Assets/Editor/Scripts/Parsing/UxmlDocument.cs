@@ -1,7 +1,8 @@
-﻿using Assets.Editor.Scripts.Generator.Extensions;
+﻿using Rosalina.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
 /// <summary>
 /// Represents a UXML template document.
 /// </summary>
