@@ -1,11 +1,13 @@
 ﻿using Rosalina.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 /// <summary>
 /// Represents a UXML template document.
 /// </summary>
+[DebuggerDisplay("{Name} (Path='{Path}')")]
 internal class UxmlDocument
 {
     /// <summary>

@@ -1,4 +1,3 @@
-using Microsoft.CodeAnalysis;
 using System;
 using System.IO;
 using System.Linq;
@@ -22,11 +21,18 @@ public class RosalinaAssetProcessor : AssetPostprocessor
                 string uiDocumentPath = uiFilesChanged[i];
                 var document = new UIDocumentAsset(uiDocumentPath);
 
-                EditorUtility.DisplayProgressBar("Rosalina", $"Generating {document.Name} code...", GeneratePercentage(i, uiFilesChanged.Length));
-                Debug.Log($"[Rosalina]: Generating UI code behind for {uiDocumentPath}");
+                try
+                {
+                    EditorUtility.DisplayProgressBar("Rosalina", $"Generating {document.Name} code...", GeneratePercentage(i, uiFilesChanged.Length));
 
-                RosalinaGenerator.Generate(document);
-                Debug.Log($"[Rosalina]: Done generating: {document.Name} (output: {document.GeneratedFileOutputPath})");
+                    Debug.Log($"[Rosalina]: Generating UI code behind for {uiDocumentPath}");
+                    RosalinaGenerator.Generate(document);
+                    Debug.Log($"[Rosalina]: Done generating: {document.Name} (output: {document.GeneratedFileOutputPath})");
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogException(ex);
+                }
             }
 
             Debug.Log($"[Rosalina]: Done.");
