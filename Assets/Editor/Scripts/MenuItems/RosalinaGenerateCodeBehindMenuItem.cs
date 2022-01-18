@@ -5,7 +5,9 @@ using UnityEngine.UIElements;
 
 public class RosalinaGenerateCodeBehindMenuItem
 {
-    [MenuItem("Assets/Rosalina/Generate Code-Behind")]
+    private const string MenuItemPath = "Assets/Rosalina/Generate Code-Behind";
+
+    [MenuItem(MenuItemPath)]
     private static void GenerateUICodeBehind()
     {
         string assetPath = AssetDatabase.GetAssetPath(Selection.activeObject);
@@ -31,7 +33,7 @@ public class RosalinaGenerateCodeBehindMenuItem
         }
     }
 
-    [MenuItem("Assets/Rosalina/Generate Code-Behind", true)]
+    [MenuItem(MenuItemPath, true)]
     private static bool GenerateUICodeBehindValidation()
     {
         return Selection.activeObject.GetType() == typeof(VisualTreeAsset);
