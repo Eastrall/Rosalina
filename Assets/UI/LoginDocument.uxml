@@ -4,6 +4,6 @@
         <ui:Button text="Button" name="Button1" />
     </ui:VisualElement>
     <ui:Toggle label="Toggle" name="CheckboxToggle" />
-    <ui:Button text="Button" display-tooltip-when-elided="true" name="Button5" />
+    <ui:Button text="Button" display-tooltip-when-elided="true" name="ButtonWow" />
     <ui:VisualElement name="name" />
 </ui:UXML>

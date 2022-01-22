@@ -11,7 +11,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public partial class LoginDocument : MonoBehaviour
+public partial class LoginDocument
 {
     [SerializeField]
     private UIDocument _document;
@@ -21,7 +21,7 @@ public partial class LoginDocument : MonoBehaviour
 
     public Toggle CheckboxToggle { get; private set; }
 
-    public Button Button5 { get; private set; }
+    public Button ButtonWow { get; private set; }
 
     public VisualElement name { get; private set; }
 
@@ -38,7 +38,7 @@ public partial class LoginDocument : MonoBehaviour
         TitleLabel = (Label)Root?.Q("TitleLabel");
         Button1 = (Button)Root?.Q("Button1");
         CheckboxToggle = (Toggle)Root?.Q("CheckboxToggle");
-        Button5 = (Button)Root?.Q("Button5");
+        ButtonWow = (Button)Root?.Q("ButtonWow");
         name = (VisualElement)Root?.Q("name");
     }
 }

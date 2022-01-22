@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 
 internal class UIDocumentAsset
 {
@@ -7,26 +6,16 @@ internal class UIDocumentAsset
     /// Gets the UI Document name.
     /// </summary>
     public string Name { get; }
-    
+
     /// <summary>
-    /// Gets the UI Document generated file name.
+    /// Gets the UI Document output path.
     /// </summary>
-    public string GeneratedName { get; }
+    public string Path { get; }
 
     /// <summary>
     /// Gets the UI document full path.
     /// </summary>
     public string FullPath { get; }
-
-    /// <summary>
-    /// Gets the UI Document output path.
-    /// </summary>
-    public string OutputPath { get; }
-
-    /// <summary>
-    /// Gets the generated file full path.
-    /// </summary>
-    public string GeneratedFileOutputPath { get; }
 
     /// <summary>
     /// Creates a new <see cref="UIDocumentAsset"/> instance that represents a document to be generated.
@@ -40,10 +29,8 @@ internal class UIDocumentAsset
             throw new ArgumentException($"'{nameof(uiDocumentPath)}' cannot be null or whitespace.", nameof(uiDocumentPath));
         }
 
-        Name = Path.GetFileNameWithoutExtension(uiDocumentPath);
-        GeneratedName = $"{Name}.g.cs";
+        Name = System.IO.Path.GetFileNameWithoutExtension(uiDocumentPath);
+        Path = System.IO.Path.GetDirectoryName(uiDocumentPath);
         FullPath = uiDocumentPath;
-        OutputPath = Path.GetDirectoryName(uiDocumentPath);
-        GeneratedFileOutputPath = Path.Combine(OutputPath, GeneratedName);
     }
 }

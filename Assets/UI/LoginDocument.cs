@@ -1,13 +1,9 @@
-public partial class LoginDocument 
+using UnityEngine;
+
+public partial class LoginDocument : MonoBehaviour
 {
     private void OnEnable()
     {
         InitializeDocument();
-        Button1.clicked += OnButtonClick;
-    }
-
-    private void OnButtonClick()
-    {
-        TitleLabel.text = "Clicked!";
     }
 }
