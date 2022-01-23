@@ -1,9 +1,0 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <ui:VisualElement>
-        <ui:Label text="Label" name="TitleLabel" />
-        <ui:Button text="Button" name="Button1" />
-    </ui:VisualElement>
-    <ui:Toggle label="Toggle" name="CheckboxToggle" />
-    <ui:Button text="Button" display-tooltip-when-elided="true" name="ButtonWow" />
-    <ui:VisualElement name="name" />
-</ui:UXML>
