@@ -24,8 +24,8 @@ public class RosalinaAssetProcessor : AssetPostprocessor
 
                 try
                 {
-                    EditorUtility.DisplayProgressBar("Rosalina", $"Generating {document.Name} code...", GeneratePercentage(i, uiFilesChanged.Length));
-                    Debug.Log($"[Rosalina]: Generating UI code behind for {uiDocumentPath}");
+                    EditorUtility.DisplayProgressBar("Rosalina", $"Generating {document.Name} bindings...", GeneratePercentage(i, uiFilesChanged.Length));
+                    Debug.Log($"[Rosalina]: Generating UI bindings for {uiDocumentPath}");
 
                     RosalinaGenerationResult result = generator.Generate(document, $"{document.Name}.g.cs");
 

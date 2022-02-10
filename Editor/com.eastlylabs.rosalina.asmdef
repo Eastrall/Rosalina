@@ -1,3 +1,16 @@
 {
-	"name": "com.eastlylabs.rosalina"
+    "name": "com.eastlylabs.rosalina",
+    "rootNamespace": "",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [
+        "Microsoft.Bcl.AsyncInterfaces.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }
