@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -13,16 +12,15 @@ public class RosalinaGenerateBindingsMenuItem
     {
         string assetPath = AssetDatabase.GetAssetPath(Selection.activeObject);
         var document = new UIDocumentAsset(assetPath);
-        IRosalinaGenerator generator = new RosalinaBindingsGenerator();
 
         try
         {
             EditorUtility.DisplayProgressBar("Rosalina", $"Generating {document.Name} UI bindings...", 50);
             Debug.Log($"[Rosalina]: Generating UI bindings for {assetPath}");
 
-            RosalinaGenerationResult result = generator.Generate(document, $"{document.Name}.g.cs");
+            RosalinaGenerationResult result = RosalinaGenerator.GenerateBindings(document, $"{document.Name}.g.cs");
+            result.Save();
 
-            File.WriteAllText(result.OutputFilePath, result.Code);
             AssetDatabase.Refresh();
 
             Debug.Log($"[Rosalina]: Done generating UI bindings: {document.Name} (output: {result.OutputFilePath})");
@@ -40,6 +38,6 @@ public class RosalinaGenerateBindingsMenuItem
     [MenuItem(MenuItemPath, true)]
     private static bool GenerateUIBindingsValidation()
     {
-        return Selection.activeObject.GetType() == typeof(VisualTreeAsset);
+        return Selection.activeObject != null && Selection.activeObject.GetType() == typeof(VisualTreeAsset);
     }
 }

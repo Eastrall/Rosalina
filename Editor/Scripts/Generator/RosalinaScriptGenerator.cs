@@ -5,8 +5,11 @@ using System;
 using System.IO;
 using UnityEngine;
 
-internal class RosalinaScriptGenerator : IRosalinaGenerator
+internal class RosalinaScriptGenerator
 {
+    private const string InitializeMethodName = "InitializeDocument";
+    private const string UnityInitializeHookName = "OnEnable";
+
     public RosalinaGenerationResult Generate(UIDocumentAsset document, string outputFileName)
     {
         if (document is null)
@@ -21,11 +24,11 @@ internal class RosalinaScriptGenerator : IRosalinaGenerator
 
         var initializeDocumentMethod = SyntaxFactory.ExpressionStatement(
             SyntaxFactory.InvocationExpression(
-                SyntaxFactory.IdentifierName("InitializeDocument")
+                SyntaxFactory.IdentifierName(InitializeMethodName)
             )
         );
 
-        MethodDeclarationSyntax onEnableMethod = RosalinaSyntaxFactory.CreateMethod("void", "OnEnable", SyntaxKind.PrivateKeyword)
+        MethodDeclarationSyntax onEnableMethod = RosalinaSyntaxFactory.CreateMethod("void", UnityInitializeHookName, SyntaxKind.PrivateKeyword)
             .WithBody(SyntaxFactory.Block(initializeDocumentMethod));
 
         ClassDeclarationSyntax @class = SyntaxFactory.ClassDeclaration(document.Name)

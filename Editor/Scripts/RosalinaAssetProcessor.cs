@@ -20,16 +20,15 @@ public class RosalinaAssetProcessor : AssetPostprocessor
             {
                 string uiDocumentPath = uiFilesChanged[i];
                 var document = new UIDocumentAsset(uiDocumentPath);
-                IRosalinaGenerator generator = new RosalinaBindingsGenerator();
 
                 try
                 {
                     EditorUtility.DisplayProgressBar("Rosalina", $"Generating {document.Name} bindings...", GeneratePercentage(i, uiFilesChanged.Length));
                     Debug.Log($"[Rosalina]: Generating UI bindings for {uiDocumentPath}");
 
-                    RosalinaGenerationResult result = generator.Generate(document, $"{document.Name}.g.cs");
+                    RosalinaGenerationResult result = RosalinaGenerator.GenerateBindings(document, $"{document.Name}.g.cs");
+                    result.Save();
 
-                    File.WriteAllText(result.OutputFilePath, result.Code);
                     Debug.Log($"[Rosalina]: Done generating: {document.Name} (output: {result.OutputFilePath})");
                 }
                 catch (Exception ex)
