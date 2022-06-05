@@ -1,4 +1,6 @@
-﻿using Microsoft.CodeAnalysis;
+﻿#if UNITY_EDITOR
+
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
@@ -64,3 +66,5 @@ internal static class RosalinaSyntaxFactory
         return initializeMethod;
     }
 }
+
+#endif

@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if UNITY_EDITOR
+using System;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -41,3 +42,4 @@ public class RosalinaGenerateBindingsMenuItem
         return Selection.activeObject != null && Selection.activeObject.GetType() == typeof(VisualTreeAsset);
     }
 }
+#endif

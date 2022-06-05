@@ -1,4 +1,5 @@
-﻿using Rosalina.Extensions;
+﻿#if UNITY_EDITOR
+using Rosalina.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -60,3 +61,4 @@ internal class UxmlDocument
             .Where(x => x.HasName);
     }
 }
+#endif

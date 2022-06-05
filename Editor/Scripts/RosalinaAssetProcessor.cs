@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using System;
 using System.IO;
 using System.Linq;
@@ -45,3 +46,4 @@ public class RosalinaAssetProcessor : AssetPostprocessor
 
     private static int GeneratePercentage(int value, int total) => Math.Clamp((value / total) * 100, 0, 100);
 }
+#endif

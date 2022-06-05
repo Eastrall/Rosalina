@@ -1,4 +1,5 @@
-﻿internal static class RosalinaGenerator
+﻿#if UNITY_EDITOR
+internal static class RosalinaGenerator
 {
     /// <summary>
     /// Generates a C# script containing the bindings of the given UI document.
@@ -22,3 +23,4 @@
         return new RosalinaScriptGenerator().Generate(document, outputFileName);
     }
 }
+#endif

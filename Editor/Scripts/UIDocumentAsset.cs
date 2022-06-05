@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if UNITY_EDITOR
+using System;
 
 internal class UIDocumentAsset
 {
@@ -34,3 +35,4 @@ internal class UIDocumentAsset
         FullPath = uiDocumentPath;
     }
 }
+#endif

@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if UNITY_EDITOR
+using System;
 using System.Collections.Generic;
 
 internal static class UIPropertyTypes
@@ -32,3 +33,4 @@ internal static class UIPropertyTypes
         return _nativeUITypes.TryGetValue(uiElementName, out Type type) ? type : null;
     }
 }
+#endif

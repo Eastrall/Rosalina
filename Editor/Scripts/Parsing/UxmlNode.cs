@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#if UNITY_EDITOR
+using System.Collections.Generic;
 using System.Diagnostics;
 
 [DebuggerDisplay("{Type} (name='{Name}')")]
@@ -42,3 +43,4 @@ internal class UxmlNode
         IsRoot = isRoot;
     }
 }
+#endif

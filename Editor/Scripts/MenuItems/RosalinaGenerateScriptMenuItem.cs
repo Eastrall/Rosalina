@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if UNITY_EDITOR
+using System;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -93,3 +94,4 @@ public class RosalinaGenerateScriptMenuItem
             "No");
     }
 }
+#endif

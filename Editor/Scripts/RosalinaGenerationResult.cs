@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿#if UNITY_EDITOR
+using System.IO;
 
 /// <summary>
 /// Describes a generation result.
@@ -34,3 +35,4 @@ internal class RosalinaGenerationResult
         File.WriteAllText(OutputFilePath, Code);
     }
 }
+#endif

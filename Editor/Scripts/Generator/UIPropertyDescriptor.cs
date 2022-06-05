@@ -1,4 +1,6 @@
-﻿/// <summary>
+﻿#if UNITY_EDITOR
+
+/// <summary>
 /// Describes an UXML UI property.
 /// </summary>
 internal class UIPropertyDescriptor
@@ -33,3 +35,5 @@ internal class UIPropertyDescriptor
         PrivateName = $"_{char.ToLowerInvariant(name[0])}{name[1..]}";
     }
 }
+
+#endif

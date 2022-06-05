@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿#if UNITY_EDITOR
+using System.IO;
 using System.Xml.Linq;
 
 internal class RosalinaUXMLParser
@@ -36,3 +37,4 @@ internal class RosalinaUXMLParser
         return node;
     }
 }
+#endif
