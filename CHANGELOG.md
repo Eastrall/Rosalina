@@ -1,5 +1,11 @@
 # Rosalina CHANGELOG
 
+## 1.0.2 - 2022-06-05
+
+### 🐛Bug fixes
+
+* Fix error when building a project ; excluding Rosalina from output build and making the tool "Editor-Only" (https://github.com/Eastrall/Rosalina/commit/3f3acdb65b5c160fc167ff79b0027644f13c6874)
+
 ## 1.0.2 - 2022/05/28
 
 ### 🪛 Misc
