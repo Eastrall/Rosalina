@@ -105,6 +105,21 @@ initialization process (element queries) **should** be done on the `OnEnable()` 
 asset is instancied at this moment.
 *Thank you for the tip!*
 
+According to Unity's UI Builder warnings, a `VisualElement` name can only contains **letters**, **numbers**, **underscores** and **dashes**.
+Since a name with **dashes** is not a valid name within a C# context, during the code generation process, Rosalina will automatically convert `dashed-names` into `PascalCase`.
+Meaning that if you have the following UXML:
+```xml
+<ui:VisualElement>
+    <ui:Button text="Button" name="confirm-button"/>
+</ui:VisualElement>
+```
+Rosalina will generate the following property:
+```csharp
+public Button ConfirmButton { get; private set; }
+```
+
+In case you already have a `ConfirmButton` as a `VisualElement` name, do not worry, Rosalina will detect it for you during the code generation process and throw an error letting you know there is a duplicate property in your UXML document.
+
 ## Known limitations
 
 For now, Rosalina only generates the UI Document bindings and code behding scripts based on the UI element names. You

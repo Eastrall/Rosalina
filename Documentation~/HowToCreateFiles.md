@@ -21,7 +21,7 @@ If this file is not generated automatically, you can generate it by right-clicki
 ![img.png](files_2.png)
 
 ### Limitations
-- Rosalina currently does not support ``kebab-case`` or ``train-cases`` for the ``name`` attribute: see [#12](https://github.com/Eastrall/Rosalina/issues/12)
+
 - The generated files share the name of the ``Visual Tree Asset``. Currently, it's not possible to change the script names.
 - While it's possible to change the path of the UI-Script, the UI-Bindings can currently not be moved.
 - Rosalina currently does not support namespaces.

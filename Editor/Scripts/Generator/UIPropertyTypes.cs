@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 internal static class UIPropertyTypes
 {
-    private static readonly IDictionary<string, Type> _nativeUITypes = new Dictionary<string, Type>()
+    private static readonly IReadOnlyDictionary<string, Type> _nativeUITypes = new Dictionary<string, Type>()
     {
         // Containers
         { "VisualElement", typeof(UnityEngine.UIElements.VisualElement) },

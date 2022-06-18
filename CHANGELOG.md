@@ -1,5 +1,11 @@
 # Rosalina CHANGELOG
 
+## 1.0.4 - ...
+
+### 🚀 Enhancement
+
+* TBA 
+
 ## 1.0.3 - 2022-06-05
 
 ### 🐛Bug fixes
@@ -26,7 +32,7 @@
 
 ## 1.0.0 - 2022/02/01
 
-### Features 
+### ✨ Features 
 
 * Watcher on UXML templates
 * Code generation for UI bindings based on UXML templates

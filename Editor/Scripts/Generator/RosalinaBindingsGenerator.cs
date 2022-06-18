@@ -135,20 +135,22 @@ internal class RosalinaBindingsGenerator
     {
         var statements = new List<InitializationStatement>();
         MemberAccessExpressionSyntax documentQueryMethodAccess = CreateRootQueryMethodAccessor();
-        IEnumerable<UxmlNode> childNodes = uxmlDocument.GetChildren();
+        IEnumerable<UIProperty> properties = uxmlDocument.GetChildren().Select(x => new UIProperty(x.Type, x.Name)).ToList();
 
-        foreach (UxmlNode node in childNodes)
+        if (CheckForDuplicateProperties(properties))
         {
-            var uiProperty = new UIPropertyDescriptor(node.Type, node.Name);
-            Type uiPropertyType = UIPropertyTypes.GetUIElementType(uiProperty.Type);
+            throw new InvalidProgramException($"Failed to generate bindings for document: {uxmlDocument.Name} because of duplicate properties.");
+        }
 
-            if (uiPropertyType is null)
+        foreach (UIProperty uiProperty in properties)
+        {
+            if (uiProperty.Type is null)
             {
-                Debug.LogWarning($"[Rosalina]: Failed to get property type: '{uiProperty.Type}', field: '{uiProperty.Name}' for document '{uxmlDocument.Path}'. Property will be ignored.");
+                Debug.LogWarning($"[Rosalina]: Failed to get property type: '{uiProperty.TypeName}', field: '{uiProperty.Name}' for document '{uxmlDocument.Path}'. Property will be ignored.");
                 continue;
             }
 
-            PropertyDeclarationSyntax @property = RosalinaSyntaxFactory.CreateProperty(uiPropertyType.Name, uiProperty.Name, SyntaxKind.PublicKeyword)
+            PropertyDeclarationSyntax @property = RosalinaSyntaxFactory.CreateProperty(uiProperty.Type.Name, uiProperty.Name, SyntaxKind.PublicKeyword)
                 .AddAccessorListAccessors(
                     SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
                         .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))
@@ -169,7 +171,7 @@ internal class RosalinaBindingsGenerator
                 )
             });
             var cast = SyntaxFactory.CastExpression(
-                SyntaxFactory.ParseTypeName(uiPropertyType.Name),
+                SyntaxFactory.ParseTypeName(uiProperty.Type.Name),
                 SyntaxFactory.InvocationExpression(documentQueryMethodAccess, SyntaxFactory.ArgumentList(argumentList))
             );
             var statement = SyntaxFactory.ExpressionStatement(
@@ -184,6 +186,24 @@ internal class RosalinaBindingsGenerator
         }
 
         return statements.ToArray();
+    }
+
+    private static bool CheckForDuplicateProperties(IEnumerable<UIProperty> properties)
+    {
+        var duplicatePropertyGroups = properties.GroupBy(x => x.Name).Where(g => g.Count() > 1);
+        bool containsDuplicateProperties = duplicatePropertyGroups.Any();
+
+        if (containsDuplicateProperties)
+        {
+            foreach (var property in duplicatePropertyGroups)
+            {
+                string duplicateProperties = string.Join(", ", property.Select(x => $"{x.OriginalName}"));
+
+                Debug.LogError($"Conflict detected between {duplicateProperties}.");
+            }
+        }
+
+        return containsDuplicateProperties;
     }
 
     private struct InitializationStatement
