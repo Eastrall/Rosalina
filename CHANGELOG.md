@@ -1,10 +1,14 @@
 # Rosalina CHANGELOG
 
-## 1.0.4 - ...
+## 1.1.0 - ...
 
 ### 🚀 Enhancement
 
 * TBA 
+
+### 🐛Bug fixes
+
+* TBA
 
 ## 1.0.3 - 2022-06-05
 
