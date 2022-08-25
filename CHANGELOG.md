@@ -1,6 +1,12 @@
 # Rosalina CHANGELOG
 
-## 1.1.0 - ...
+## 1.2.0 - 2022-08-25
+
+### 🚀 Enhancement
+
+* Add `Image` support ([100587d](https://github.com/Eastrall/Rosalina/commit/100587da2244f910381409546aa7e35280ba48bf))
+
+## 1.1.0 - 2022-06-19
 
 ### 🚀 Enhancement
 
@@ -16,14 +22,14 @@
 
 * Fix error when building a project ; excluding Rosalina from output build and making the tool "Editor-Only" ([3f3acdb](https://github.com/Eastrall/Rosalina/commit/3f3acdb65b5c160fc167ff79b0027644f13c6874))
 
-## 1.0.2 - 2022/05/28
+## 1.0.2 - 2022-05-28
 
 ### 🪛 Misc
 
 * Remove all Roslyn related `dll` files and build a single `dll` with all necessary components for code generation.
 * Add `netstandard2.0` project with the `Rosalina.Roslyn` assembly project generating the single `dll` for code generation.
 
-## 1.0.1 - 2022/03/05
+## 1.0.1 - 2022-03-05
 
 ### 🐛Bug fixes
 
@@ -34,7 +40,7 @@
 * Review `Rosalina` generation main entry point.
 * Clean menu item code.
 
-## 1.0.0 - 2022/02/01
+## 1.0.0 - 2022-02-01
 
 ### ✨ Features 
 
