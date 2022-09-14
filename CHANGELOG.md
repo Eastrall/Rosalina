@@ -1,5 +1,11 @@
 # Rosalina CHANGELOG
 
+## 1.2.1 - 2022-09-14
+
+### 🐛Bug fixes
+
+* Fix visual tree asset property query generation in bindings ([e0b6005](https://github.com/Eastrall/Rosalina/commit/e0b6005d5d68b400c3cdf2a97f3b1ebfc95ac9f1))
+
 ## 1.2.0 - 2022-08-25
 
 ### 🚀 Enhancement
