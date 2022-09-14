@@ -166,7 +166,7 @@ internal class RosalinaBindingsGenerator
                 SyntaxFactory.Argument(
                     SyntaxFactory.LiteralExpression(
                         SyntaxKind.StringLiteralExpression,
-                        SyntaxFactory.Literal(uiProperty.Name)
+                        SyntaxFactory.Literal(uiProperty.OriginalName)
                     )
                 )
             });
