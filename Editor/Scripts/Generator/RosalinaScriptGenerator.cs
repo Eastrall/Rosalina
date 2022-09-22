@@ -51,7 +51,7 @@ internal class RosalinaScriptGenerator
             .NormalizeWhitespace()
             .ToFullString();
 
-        return new RosalinaGenerationResult(code, Path.Combine(document.Path, outputFileName));
+        return new RosalinaGenerationResult(code, outputFileName);
     }
 }
 

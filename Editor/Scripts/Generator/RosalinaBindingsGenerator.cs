@@ -5,7 +5,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -78,7 +77,7 @@ internal class RosalinaBindingsGenerator
             .ToFullString();
         string generatedCode = GeneratedCodeHeader + code;
 
-        return new RosalinaGenerationResult(generatedCode, Path.Combine(document.Path, outputFileName));
+        return new RosalinaGenerationResult(generatedCode, outputFileName);
     }
 
     private static MemberDeclarationSyntax CreateDocumentVariable()
