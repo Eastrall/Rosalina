@@ -34,4 +34,5 @@ internal static class UIPropertyTypes
         return _nativeUITypes.TryGetValue(uiElementName, out Type type) ? type : null;
     }
 }
+
 #endif

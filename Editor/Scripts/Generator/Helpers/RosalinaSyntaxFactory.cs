@@ -4,7 +4,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
-using UnityEditor;
 
 /// <summary>
 /// Provides helpers for code generation using Roslyn.
@@ -60,8 +59,7 @@ internal static class RosalinaSyntaxFactory
 
         MethodDeclarationSyntax initializeMethod = SyntaxFactory
             .MethodDeclaration(methodReturnType, methodName)
-            .AddModifiers(methodModifiers)
-            .WithBody(SyntaxFactory.Block());
+            .AddModifiers(methodModifiers);
 
         return initializeMethod;
     }

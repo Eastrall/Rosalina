@@ -4,7 +4,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -24,15 +23,8 @@ internal class RosalinaBindingsGenerator : IRosalinaGeneartor
 
 ";
     private const string DocumentFieldName = "_document";
-    private const string DocumentRootVisualElementFieldName = "rootVisualElement";
     private const string RootVisualElementPropertyName = "Root";
-    private const string RootVisualElementQueryMethodName = "Q";
     private const string InitializeDocumentMethodName = "InitializeDocument";
-    private static readonly UsingDirectiveSyntax[] DefaultUsings = new UsingDirectiveSyntax[]
-    {
-        SyntaxFactory.UsingDirective(SyntaxFactory.IdentifierName("UnityEngine")),
-        SyntaxFactory.UsingDirective(SyntaxFactory.IdentifierName("UnityEngine.UIElements"))
-    };
 
     public RosalinaGenerationResult Generate(UIDocumentAsset documentAsset)
     {
@@ -43,26 +35,28 @@ internal class RosalinaBindingsGenerator : IRosalinaGeneartor
 
         MemberDeclarationSyntax documentVariable = CreateDocumentVariable();
         MemberDeclarationSyntax visualElementProperty = CreateVisualElementRootProperty();
-        InitializationStatement[] statements = GenerateInitializeStatements(documentAsset.UxmlDocument);
+        InitializationStatement[] statements = RosalinaStatementSyntaxFactory.GenerateInitializeStatements(documentAsset.UxmlDocument, CreateRootQueryMethodAccessor());
         PropertyDeclarationSyntax[] propertyStatements = statements.Select(x => x.Property).ToArray();
         StatementSyntax[] initializationStatements = statements.Select(x => x.Statement).ToArray();
 
         MethodDeclarationSyntax initializeMethod = RosalinaSyntaxFactory.CreateMethod("void", InitializeDocumentMethodName, SyntaxKind.PublicKeyword)
             .WithBody(SyntaxFactory.Block(initializationStatements));
 
-        MemberDeclarationSyntax[] classMembers = propertyStatements
-            .Append(visualElementProperty)
-            .Append(initializeMethod)
-            .ToArray();
-
         ClassDeclarationSyntax @class = SyntaxFactory.ClassDeclaration(documentAsset.Name)
             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
             .AddModifiers(SyntaxFactory.Token(SyntaxKind.PartialKeyword))
             .AddMembers(documentVariable)
-            .AddMembers(classMembers);
+            .AddMembers(propertyStatements)
+            .AddMembers(
+                visualElementProperty,
+                initializeMethod
+            );
 
         CompilationUnitSyntax compilationUnit = SyntaxFactory.CompilationUnit()
-            .AddUsings(DefaultUsings)
+            .AddUsings(
+                SyntaxFactory.UsingDirective(SyntaxFactory.IdentifierName("UnityEngine")),
+                SyntaxFactory.UsingDirective(SyntaxFactory.IdentifierName("UnityEngine.UIElements"))
+             )
             .AddMembers(@class);
 
         string code = compilationUnit
@@ -105,7 +99,7 @@ internal class RosalinaBindingsGenerator : IRosalinaGeneartor
                             SyntaxFactory.MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
                                 SyntaxFactory.IdentifierName(documentFieldName),
-                                SyntaxFactory.IdentifierName(DocumentRootVisualElementFieldName)),
+                                SyntaxFactory.IdentifierName(UnityNames.DocumentRootVisualElementFieldName)),
                             SyntaxFactory.Token(SyntaxKind.SemicolonToken)
                         )
                     )
@@ -119,96 +113,8 @@ internal class RosalinaBindingsGenerator : IRosalinaGeneartor
             SyntaxKind.SimpleMemberAccessExpression,
             SyntaxFactory.IdentifierName($"{RootVisualElementPropertyName}?"),
             SyntaxFactory.Token(SyntaxKind.DotToken),
-            SyntaxFactory.IdentifierName(RootVisualElementQueryMethodName)
+            SyntaxFactory.IdentifierName(UnityNames.RootVisualElementQueryMethodName)
         );
-    }
-
-    private static InitializationStatement[] GenerateInitializeStatements(UxmlDocument uxmlDocument)
-    {
-        var statements = new List<InitializationStatement>();
-        MemberAccessExpressionSyntax documentQueryMethodAccess = CreateRootQueryMethodAccessor();
-        IEnumerable<UIProperty> properties = uxmlDocument.GetChildren().Select(x => new UIProperty(x.Type, x.Name)).ToList();
-
-        if (CheckForDuplicateProperties(properties))
-        {
-            throw new InvalidProgramException($"Failed to generate bindings for document: {uxmlDocument.Name} because of duplicate properties.");
-        }
-
-        foreach (UIProperty uiProperty in properties)
-        {
-            if (uiProperty.Type is null)
-            {
-                Debug.LogWarning($"[Rosalina]: Failed to get property type: '{uiProperty.TypeName}', field: '{uiProperty.Name}' for document '{uxmlDocument.Path}'. Property will be ignored.");
-                continue;
-            }
-
-            PropertyDeclarationSyntax @property = RosalinaSyntaxFactory.CreateProperty(uiProperty.Type.Name, uiProperty.Name, SyntaxKind.PublicKeyword)
-                .AddAccessorListAccessors(
-                    SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
-                        .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))
-                )
-                .AddAccessorListAccessors(
-                    SyntaxFactory.AccessorDeclaration(SyntaxKind.SetAccessorDeclaration)
-                        .AddModifiers(SyntaxFactory.Token(SyntaxKind.PrivateKeyword))
-                        .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))
-                );
-
-            var argumentList = SyntaxFactory.SeparatedList(new[]
-            {
-                SyntaxFactory.Argument(
-                    SyntaxFactory.LiteralExpression(
-                        SyntaxKind.StringLiteralExpression,
-                        SyntaxFactory.Literal(uiProperty.OriginalName)
-                    )
-                )
-            });
-            var cast = SyntaxFactory.CastExpression(
-                SyntaxFactory.ParseTypeName(uiProperty.Type.Name),
-                SyntaxFactory.InvocationExpression(documentQueryMethodAccess, SyntaxFactory.ArgumentList(argumentList))
-            );
-            var statement = SyntaxFactory.ExpressionStatement(
-                SyntaxFactory.AssignmentExpression(
-                    SyntaxKind.SimpleAssignmentExpression,
-                    SyntaxFactory.IdentifierName(uiProperty.Name),
-                    cast
-                )
-            );
-
-            statements.Add(new InitializationStatement(statement, property));
-        }
-
-        return statements.ToArray();
-    }
-
-    private static bool CheckForDuplicateProperties(IEnumerable<UIProperty> properties)
-    {
-        var duplicatePropertyGroups = properties.GroupBy(x => x.Name).Where(g => g.Count() > 1);
-        bool containsDuplicateProperties = duplicatePropertyGroups.Any();
-
-        if (containsDuplicateProperties)
-        {
-            foreach (var property in duplicatePropertyGroups)
-            {
-                string duplicateProperties = string.Join(", ", property.Select(x => $"{x.OriginalName}"));
-
-                Debug.LogError($"Conflict detected between {duplicateProperties}.");
-            }
-        }
-
-        return containsDuplicateProperties;
-    }
-
-    private struct InitializationStatement
-    {
-        public StatementSyntax Statement { get; }
-
-        public PropertyDeclarationSyntax Property { get; }
-
-        public InitializationStatement(StatementSyntax statement, PropertyDeclarationSyntax property)
-        {
-            Statement = statement;
-            Property = property;
-        }
     }
 }
 
