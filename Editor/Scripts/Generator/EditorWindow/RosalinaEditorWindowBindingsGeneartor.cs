@@ -23,27 +23,6 @@ internal class RosalinaEditorWindowBindingsGeneartor : IRosalinaGeneartor
         PropertyDeclarationSyntax[] propertyStatements = statements.Select(x => x.Property).ToArray();
         StatementSyntax[] initializationStatements = statements.Select(x => x.Statement).ToArray();
 
-        MethodDeclarationSyntax createGUIMethod = RosalinaSyntaxFactory
-            .CreateMethod("void", UnityNames.CreateGUIHookName, SyntaxKind.PublicKeyword)
-            .WithBody(
-                SyntaxFactory.Block(
-                    new[]
-                    {
-                         CreateVisualTreeAssetVariable(documentAsset.FullPath),
-                         CreateVisualElementVariable(),
-                         AddVisualElementToRootElement()
-                    }
-                    .Concat(initializationStatements)
-                    .Append(CallOnCreateGUIMethod())
-                )
-            );
-
-        MethodDeclarationSyntax onCreateGUIMethod = RosalinaSyntaxFactory
-            .CreateMethod("void", OnCreateGUIHookName, SyntaxKind.PartialKeyword)
-            .WithSemicolonToken(
-                SyntaxFactory.Token(SyntaxKind.SemicolonToken)
-            );
-
         CompilationUnitSyntax compilationUnit = SyntaxFactory
             .CompilationUnit()
             .AddUsings(
@@ -65,8 +44,28 @@ internal class RosalinaEditorWindowBindingsGeneartor : IRosalinaGeneartor
                     )
                     .AddMembers(propertyStatements)
                     .AddMembers(
-                        createGUIMethod,
-                        onCreateGUIMethod
+                        // public void CreateGUI() { ... }
+                        RosalinaSyntaxFactory
+                            .CreateMethod("void", UnityNames.CreateGUIHookName, SyntaxKind.PublicKeyword)
+                            .WithBody(
+                                SyntaxFactory.Block(
+                                    new[]
+                                    {
+                                         CreateVisualTreeAssetVariable(documentAsset.FullPath),
+                                         CreateVisualElementVariable(),
+                                         AddVisualElementToRootElement()
+                                    }
+                                    .Concat(initializationStatements)
+                                    .Append(CallOnCreateGUIMethod())
+                                )
+                            ),
+
+                        // partial void OnCreateGUI();
+                        RosalinaSyntaxFactory
+                            .CreateMethod("void", OnCreateGUIHookName, SyntaxKind.PartialKeyword)
+                            .WithSemicolonToken(
+                                SyntaxFactory.Token(SyntaxKind.SemicolonToken)
+                            )
                     )
             );
 
