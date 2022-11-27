@@ -19,6 +19,11 @@ internal class UIDocumentAsset
     public string FullPath { get; }
 
     /// <summary>
+    /// Gets the Uxml document.
+    /// </summary>
+    public UxmlDocument UxmlDocument { get; }
+
+    /// <summary>
     /// Creates a new <see cref="UIDocumentAsset"/> instance that represents a document to be generated.
     /// </summary>
     /// <param name="uiDocumentPath">UXML UI document file path.</param>
@@ -33,6 +38,7 @@ internal class UIDocumentAsset
         Name = System.IO.Path.GetFileNameWithoutExtension(uiDocumentPath);
         Path = System.IO.Path.GetDirectoryName(uiDocumentPath);
         FullPath = uiDocumentPath;
+        UxmlDocument = RosalinaUXMLParser.ParseUIDocument(FullPath) ?? throw new ArgumentNullException(nameof(UxmlDocument), $"Failed to parse UXML file: '{FullPath}'");
     }
 }
 #endif

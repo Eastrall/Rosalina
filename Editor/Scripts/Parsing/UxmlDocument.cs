@@ -27,27 +27,34 @@ internal class UxmlDocument
     public UxmlNode RootNode { get; }
 
     /// <summary>
+    /// Gets a boolean value that indiciates if the document is an editor extension.
+    /// </summary>
+    public bool IsEditorExtension { get; }
+
+    /// <summary>
     /// Creates a new <see cref="UxmlDocument"/> instance.
     /// </summary>
     /// <param name="name">Document name.</param>
     /// <param name="path">Document path.</param>
     /// <param name="rootNode">Document root node.</param>
-    /// <exception cref="ArgumentException">Thrown when the 'name' or 'path' parameters are null or empty.</exception>
-    public UxmlDocument(string name, string path, UxmlNode rootNode)
+    /// <param name="isEditorExtension">Value that indicates if the Uxml document is an editor extension.</param>
+    /// <exception cref="ArgumentNullException">Thrown when the 'name' or 'path' parameters are null or empty.</exception>
+    public UxmlDocument(string name, string path, UxmlNode rootNode, bool isEditorExtension)
     {
-        if (string.IsNullOrEmpty(name))
+        if (string.IsNullOrWhiteSpace(name))
         {
-            throw new ArgumentException($"'{nameof(name)}' cannot be null or empty.", nameof(name));
+            throw new ArgumentNullException($"'{nameof(name)}' cannot be null or empty.", nameof(name));
         }
 
-        if (string.IsNullOrEmpty(path))
+        if (string.IsNullOrWhiteSpace(path))
         {
-            throw new ArgumentException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
+            throw new ArgumentNullException($"'{nameof(path)}' cannot be null or empty.", nameof(path));
         }
 
         Name = name;
         Path = path;
         RootNode = rootNode;
+        IsEditorExtension = isEditorExtension;
     }
 
     /// <summary>

@@ -4,24 +4,18 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
-using System.IO;
 using UnityEngine;
 
-internal class RosalinaScriptGenerator
+internal class RosalinaScriptGenerator : IRosalinaGeneartor
 {
     private const string InitializeMethodName = "InitializeDocument";
     private const string UnityInitializeHookName = "OnEnable";
 
-    public RosalinaGenerationResult Generate(UIDocumentAsset document, string outputFileName)
+    public RosalinaGenerationResult Generate(UIDocumentAsset documentAsset)
     {
-        if (document is null)
+        if (documentAsset is null)
         {
-            throw new ArgumentNullException(nameof(document), "Cannot generate binding with an empty UI document definition.");
-        }
-
-        if (string.IsNullOrEmpty(outputFileName))
-        {
-            throw new ArgumentException("An output file name is required.", nameof(outputFileName));
+            throw new ArgumentNullException(nameof(documentAsset), "Cannot generate binding with a null document asset.");
         }
 
         var initializeDocumentMethod = SyntaxFactory.ExpressionStatement(
@@ -33,7 +27,7 @@ internal class RosalinaScriptGenerator
         MethodDeclarationSyntax onEnableMethod = RosalinaSyntaxFactory.CreateMethod("void", UnityInitializeHookName, SyntaxKind.PrivateKeyword)
             .WithBody(SyntaxFactory.Block(initializeDocumentMethod));
 
-        ClassDeclarationSyntax @class = SyntaxFactory.ClassDeclaration(document.Name)
+        ClassDeclarationSyntax @class = SyntaxFactory.ClassDeclaration(documentAsset.Name)
            .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
            .AddModifiers(SyntaxFactory.Token(SyntaxKind.PartialKeyword))
            .AddBaseListTypes(
@@ -51,7 +45,7 @@ internal class RosalinaScriptGenerator
             .NormalizeWhitespace()
             .ToFullString();
 
-        return new RosalinaGenerationResult(code, outputFileName);
+        return new RosalinaGenerationResult(code);
     }
 }
 

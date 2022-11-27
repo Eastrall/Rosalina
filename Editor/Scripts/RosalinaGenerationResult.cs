@@ -12,27 +12,24 @@ internal class RosalinaGenerationResult
     public string Code { get; }
 
     /// <summary>
-    /// Gets the output file path.
-    /// </summary>
-    public string OutputFilePath { get; }
-
-    /// <summary>
     /// Creates a new <see cref="RosalinaGenerationResult"/> instance.
     /// </summary>
     /// <param name="code">Generated code.</param>
-    /// <param name="outputFilePath">Output file path.</param>
-    public RosalinaGenerationResult(string code, string outputFilePath)
+    public RosalinaGenerationResult(string code)
     {
         Code = code;
-        OutputFilePath = outputFilePath;
     }
 
     /// <summary>
     /// Saves the result to the output path.
     /// </summary>
-    public void Save()
+    /// <param name="outputFilePath">Output file path.</param>
+    public void Save(string outputFilePath)
     {
-        File.WriteAllText(OutputFilePath, Code);
+        if (!string.IsNullOrEmpty(outputFilePath))
+        {
+            File.WriteAllText(outputFilePath, Code);
+        }
     }
 }
 #endif
