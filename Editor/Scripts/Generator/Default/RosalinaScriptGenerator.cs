@@ -23,7 +23,7 @@ internal class RosalinaScriptGenerator : IRosalinaGeneartor
             )
         );
 
-        MethodDeclarationSyntax onEnableMethod = RosalinaSyntaxFactory.CreateMethod("void", UnityNames.OnEnableHookName, SyntaxKind.PrivateKeyword)
+        MethodDeclarationSyntax onEnableMethod = RosalinaSyntaxFactory.CreateMethod("void", UnityConstants.OnEnableHookName, SyntaxKind.PrivateKeyword)
             .WithBody(SyntaxFactory.Block(initializeDocumentMethod));
 
         ClassDeclarationSyntax @class = SyntaxFactory.ClassDeclaration(documentAsset.Name)

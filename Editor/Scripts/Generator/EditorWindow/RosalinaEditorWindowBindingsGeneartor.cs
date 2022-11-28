@@ -46,7 +46,7 @@ internal class RosalinaEditorWindowBindingsGeneartor : IRosalinaGeneartor
                     .AddMembers(
                         // public void CreateGUI() { ... }
                         RosalinaSyntaxFactory
-                            .CreateMethod("void", UnityNames.CreateGUIHookName, SyntaxKind.PublicKeyword)
+                            .CreateMethod("void", UnityConstants.CreateGUIHookName, SyntaxKind.PublicKeyword)
                             .WithBody(
                                 SyntaxFactory.Block(
                                     new[]
@@ -73,7 +73,7 @@ internal class RosalinaEditorWindowBindingsGeneartor : IRosalinaGeneartor
             .NormalizeWhitespace()
             .ToFullString();
 
-        return new RosalinaGenerationResult(code);
+        return new RosalinaGenerationResult(RosalinaGeneratorConstants.GeneratedCodeHeader + code);
     }
 
     private static MemberAccessExpressionSyntax CreateRootQueryMethodAccessor()
@@ -81,9 +81,9 @@ internal class RosalinaEditorWindowBindingsGeneartor : IRosalinaGeneartor
         return SyntaxFactory
             .MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression,
-                SyntaxFactory.IdentifierName($"{UnityNames.DocumentRootVisualElementFieldName}?"),
+                SyntaxFactory.IdentifierName($"{UnityConstants.DocumentRootVisualElementFieldName}?"),
                 SyntaxFactory.Token(SyntaxKind.DotToken),
-                SyntaxFactory.IdentifierName(UnityNames.RootVisualElementQueryMethodName)
+                SyntaxFactory.IdentifierName(UnityConstants.RootVisualElementQueryMethodName)
             );
     }
 
@@ -166,7 +166,7 @@ internal class RosalinaEditorWindowBindingsGeneartor : IRosalinaGeneartor
                 SyntaxFactory.InvocationExpression(
                     SyntaxFactory.MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
-                        SyntaxFactory.IdentifierName(UnityNames.DocumentRootVisualElementFieldName),
+                        SyntaxFactory.IdentifierName(UnityConstants.DocumentRootVisualElementFieldName),
                         SyntaxFactory.IdentifierName("Add")
                     )
                 )

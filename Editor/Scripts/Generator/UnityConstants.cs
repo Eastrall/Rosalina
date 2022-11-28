@@ -1,5 +1,6 @@
 ﻿#if UNITY_EDITOR
-internal static class UnityNames
+
+internal static class UnityConstants
 {
     public const string OnEnableHookName = "OnEnable";
     public const string CreateGUIHookName = "CreateGUI";
