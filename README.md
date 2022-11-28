@@ -173,14 +173,17 @@ public partial class SampleDocument : MonoBehaviour
 
 ### Editor Window
 
-To use a UI Document as an Unity's Editor Window, you will need to set the `editor-extension-mode` XML attribute is set to `True`. 
+To use a UI Document as an Unity's Editor Window, you will need to set the `editor-extension-mode` XML attribute to `True`.
 
 ```xml
 <ui:UXML ... editor-extension-mode="True"> <!-- Set to TRUE -->
     <ui:Button text="Sample Button" display-tooltip-when-elided="true" name="SampleButton" />
 </ui:UXML>
-
 ```
+
+Or you can check the `Editor Extension Authoring` inside the `UI Builder`. Select you UI Document root node in the `Hierarchy` then check `Editor Extension Authoring` inside the `Document settings` section.
+
+![image](https://user-images.githubusercontent.com/4021025/204352266-99b55152-280f-4f1a-82a4-33466a99eff9.png)
 
 Thus, the Rosalina's code generator will generate you a class that extends the `UnityEditor.EditorWindow`:
 
