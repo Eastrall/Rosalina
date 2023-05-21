@@ -1,10 +1,9 @@
 {
   "name": "com.eastylabs.rosalina",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "type": "tool",
   "displayName": "Rosalina",
-  "unity": "2021.2",
+  "unity": "2021.3",
   "description": "Rosalina is an UI Toolkit extension tool that generates C# binding scripts based on a UXML template.",
-  "hideInEditor": true,
-  "unityRelease": "7f1"
+  "hideInEditor": true
 }
