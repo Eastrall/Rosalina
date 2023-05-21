@@ -5,9 +5,10 @@
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
-    "overrideReferences": false,
+    "overrideReferences": true,
     "precompiledReferences": [
-        "Microsoft.Bcl.AsyncInterfaces.dll"
+        "Microsoft.CodeAnalysis.dll",
+        "Microsoft.CodeAnalysis.CSharp.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": [],

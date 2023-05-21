@@ -4,37 +4,11 @@
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<AssemblyName>Rosalina.RoslynLibrary</AssemblyName>
 		<CopyLocalLockFileAssemblies>True</CopyLocalLockFileAssemblies>
+		<RestoreProjectStyle>PackageReference</RestoreProjectStyle>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.18.2" />
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.2.0" />
 	</ItemGroup>
-
-	<Target Name="ILRepack" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
-		<PropertyGroup>
-			<WorkingDirectory>$(MSBuildThisFileDirectory)bin\$(Configuration)\$(TargetFramework)</WorkingDirectory>
-		</PropertyGroup>
-		<ItemGroup>
-			<InputAssemblies Include="Microsoft.CodeAnalysis.CSharp.dll" />
-			<InputAssemblies Include="Microsoft.CodeAnalysis.dll" />
-			<InputAssemblies Include="System.Buffers.dll" />
-			<InputAssemblies Include="System.Collections.Immutable.dll" />
-			<InputAssemblies Include="System.Memory.dll" />
-			<InputAssemblies Include="System.Numerics.Vectors.dll" />
-			<InputAssemblies Include="System.Reflection.Metadata.dll" />
-			<InputAssemblies Include="System.Runtime.CompilerServices.Unsafe.dll" />
-			<InputAssemblies Include="System.Text.Encoding.CodePages.dll" />
-			<InputAssemblies Include="System.Threading.Tasks.Extensions.dll" />
-		</ItemGroup>
-
-		<ILRepack
-            OutputType="$(OutputType)"
-            MainAssembly="$(AssemblyName).dll"
-            OutputAssembly="$(AssemblyName).dll"
-            InputAssemblies="@(InputAssemblies)"
-            InternalizeExcludeAssemblies="@(InternalizeExcludeAssemblies)"
-            WorkingDirectory="$(WorkingDirectory)" />
-	</Target>
 
 </Project>
