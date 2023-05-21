@@ -15,7 +15,7 @@ public class RosalinaGenerateScriptMenuItem
         return Selection.activeObject != null && Selection.activeObject.GetType() == typeof(VisualTreeAsset);
     }
 
-    [MenuItem(MenuItemPath, priority = 0)]
+    [MenuItem(MenuItemPath, priority = 21)]
     public static void GenerateUIScript()
     {
         string assetPath = AssetDatabase.GetAssetPath(Selection.activeObject);
