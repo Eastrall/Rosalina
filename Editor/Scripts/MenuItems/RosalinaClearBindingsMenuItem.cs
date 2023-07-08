@@ -12,7 +12,7 @@ public class RosalinaClearBindingsMenuItem
     [MenuItem(MenuItemPath, true)]
     public static bool ClearBindingsValidation()
     {
-        return Selection.activeObject != null && Selection.activeObject.GetType() == typeof(VisualTreeAsset);
+        return RosalinaSettings.Current.IsEnabled && Selection.activeObject != null && Selection.activeObject.GetType() == typeof(VisualTreeAsset);
     }
 
     [MenuItem(MenuItemPath, priority = 20)]

@@ -71,4 +71,5 @@ internal static class RosalinaGenerator
         Debug.Log($"[Rosalina]: Done generating: {document.Name} (output: {outputFile})");
     }
 }
+
 #endif

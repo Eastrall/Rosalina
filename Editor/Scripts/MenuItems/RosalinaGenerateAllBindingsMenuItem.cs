@@ -7,7 +7,15 @@ using UnityEngine;
 
 public class RosalinaGenerateAllBindingsMenuItem
 {
-    [MenuItem("Assets/Rosalina/Generate All UI Bindings", priority = 1)]
+    private const string MenuItemPath = "Assets/Rosalina/Generate All UI Bindings";
+
+    [MenuItem(MenuItemPath, true)]
+    public static bool GenerateAllBindingsValidation()
+    {
+        return RosalinaSettings.Current.IsEnabled;
+    }
+
+    [MenuItem(MenuItemPath, priority = 1)]
     public static void GenerateAllBindings()
     {
         try

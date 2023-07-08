@@ -7,7 +7,15 @@ using UnityEngine;
 
 public class RosalinaClearAllBindingsMenuItem
 {
-    [MenuItem("Assets/Rosalina/Clear All Bindings", priority = 2)]
+    private const string MenuItemPath = "Assets/Rosalina/Clear All Bindings";
+
+    [MenuItem(MenuItemPath, true)]
+    public static bool ClearAllBindingsValidation()
+    {
+        return RosalinaSettings.Current.IsEnabled;
+    }
+
+    [MenuItem(MenuItemPath, priority = 2)]
     public static void ClearAllBindings()
     {
         try
