@@ -1,4 +1,5 @@
 ﻿#if UNITY_EDITOR
+
 using UnityEditor;
 using UnityEngine;
 /// <summary>
@@ -9,13 +10,11 @@ public class RosalinaSettings : ScriptableObject
     /// <summary>
     /// Gets the current Rosalina settings.
     /// </summary>
-    public static RosalinaSettings Current => AssetDatabase.LoadAssetAtPath<RosalinaSettings>("Assets/Rosalina/RosalinaSettings.asset");
+    public static RosalinaSettings Current => AssetDatabase.LoadAssetAtPath<RosalinaSettings>("Assets/Rosalina/RosalinaSettings.asset") 
+        ?? ScriptableObject.CreateInstance<RosalinaSettings>();
 
     [SerializeField]
     private bool _isEnabled;
-
-    [SerializeField]
-    private string _defaultNamespace;
 
     /// <summary>
     /// Gets or sets a boolean value that indicates if Rosalina is enabled.
@@ -24,15 +23,6 @@ public class RosalinaSettings : ScriptableObject
     {
         get => _isEnabled;
         set => _isEnabled = value;
-    }
-
-    /// <summary>
-    /// Gets or sets the default namespace to use during code generation.
-    /// </summary>
-    public string DefaultNamespace
-    {
-        get => _defaultNamespace;
-        set => _defaultNamespace = value;
     }
 }
 

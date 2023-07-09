@@ -27,7 +27,6 @@ public class RosalinaSettingsProvider : SettingsProvider
             EditorGUI.BeginChangeCheck();
 
             _settings.IsEnabled = EditorGUILayout.Toggle("Is Enabled", _settings.IsEnabled);
-            _settings.DefaultNamespace = EditorGUILayout.TextField("Default Namespace", _settings.DefaultNamespace);
 
             if (EditorGUI.EndChangeCheck())
             {
@@ -36,7 +35,7 @@ public class RosalinaSettingsProvider : SettingsProvider
         }
     }
 
-    private static RosalinaSettings CreateRosalinaSettingsAsset()
+    public static RosalinaSettings CreateRosalinaSettingsAsset()
     {
         string resourcePath = "Assets/Rosalina";
 
