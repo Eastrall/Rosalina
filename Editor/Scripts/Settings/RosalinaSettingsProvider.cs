@@ -1,6 +1,7 @@
 ﻿#if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
@@ -17,7 +18,7 @@ public class RosalinaSettingsProvider : SettingsProvider
 
     public override void OnActivate(string searchContext, VisualElement rootElement)
     {
-        _settings = RosalinaSettings.Current != null ? RosalinaSettings.Current : CreateRosalinaSettingsAsset();
+        _settings = RosalinaSettings.Current;
     }
 
     public override void OnGUI(string searchContext)
@@ -35,21 +36,30 @@ public class RosalinaSettingsProvider : SettingsProvider
         }
     }
 
-    public static RosalinaSettings CreateRosalinaSettingsAsset()
+    public static RosalinaSettings GetOrCreateSettings()
     {
         string resourcePath = "Assets/Rosalina";
+        string settingsFileName = "RosalinaSettings.asset";
+        string settingsFilePath = Path.Combine(resourcePath, settingsFileName);
 
         if (!AssetDatabase.IsValidFolder(resourcePath))
         {
             AssetDatabase.CreateFolder("Assets", "Rosalina");
         }
 
-        RosalinaSettings newSettings = ScriptableObject.CreateInstance<RosalinaSettings>();
-        AssetDatabase.CreateAsset(newSettings, $"{resourcePath}/RosalinaSettings.asset");
-        AssetDatabase.SaveAssets();
-        AssetDatabase.Refresh();
+        if (File.Exists(settingsFilePath))
+        {
+            return AssetDatabase.LoadAssetAtPath<RosalinaSettings>(settingsFilePath);
+        }
+        else
+        {
+            RosalinaSettings newSettings = ScriptableObject.CreateInstance<RosalinaSettings>();
+            AssetDatabase.CreateAsset(newSettings, settingsFilePath);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
 
-        return RosalinaSettings.Current;
+            return newSettings;
+        }
     }
 
     [SettingsProvider]

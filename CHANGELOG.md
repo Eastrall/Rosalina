@@ -1,5 +1,20 @@
 # Rosalina CHANGELOG
 
+## 3.0.1 - 2023-07-16
+
+### 🐛Bug fixes
+
+* Fixed a bug preventing Rosalina's settings file creation.
+
+## 3.0.0 - 2023-04-09
+
+### 🚀 Enhancement
+
+* Change editor extensions bindings to its own Editor folder
+* Add clear and generate all bindings menu items
+* Replace Roslyn Library with Rosyn dlls instead
+* Add Rosalina settings to enable/disable the generator
+
 ## 2.0.0 - 2022-11-28
 
 ### 🚀 Enhancement

@@ -2,6 +2,7 @@
 
 using UnityEditor;
 using UnityEngine;
+
 /// <summary>
 /// Provides a data structure for Rosalina settings.
 /// </summary>
@@ -10,8 +11,7 @@ public class RosalinaSettings : ScriptableObject
     /// <summary>
     /// Gets the current Rosalina settings.
     /// </summary>
-    public static RosalinaSettings Current => AssetDatabase.LoadAssetAtPath<RosalinaSettings>("Assets/Rosalina/RosalinaSettings.asset") 
-        ?? ScriptableObject.CreateInstance<RosalinaSettings>();
+    public static RosalinaSettings Current => RosalinaSettingsProvider.GetOrCreateSettings();
 
     [SerializeField]
     private bool _isEnabled;
