@@ -1,6 +1,6 @@
 ﻿#if UNITY_EDITOR
 public class RosalinaConstants
 {
-    public const string Version = "3.0.0";
+    public const string Version = "3.1.0";
 }
 #endif

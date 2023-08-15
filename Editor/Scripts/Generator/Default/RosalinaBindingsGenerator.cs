@@ -8,6 +8,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 internal class RosalinaBindingsGenerator : IRosalinaGeneartor
 {
@@ -22,29 +23,32 @@ internal class RosalinaBindingsGenerator : IRosalinaGeneartor
             throw new ArgumentNullException(nameof(documentAsset), "Cannot generate binding with a null document asset.");
         }
 
-        MemberDeclarationSyntax documentVariable = CreateDocumentVariable();
-        MemberDeclarationSyntax visualElementProperty = CreateVisualElementRootProperty();
         InitializationStatement[] statements = RosalinaStatementSyntaxFactory.GenerateInitializeStatements(documentAsset.UxmlDocument, CreateRootQueryMethodAccessor());
         PropertyDeclarationSyntax[] propertyStatements = statements.Select(x => x.Property).ToArray();
         StatementSyntax[] initializationStatements = statements.Select(x => x.Statement).ToArray();
 
         MethodDeclarationSyntax initializeMethod = RosalinaSyntaxFactory.CreateMethod("void", InitializeDocumentMethodName, SyntaxKind.PublicKeyword)
-            .WithBody(SyntaxFactory.Block(initializationStatements));
+            .WithBody(Block(initializationStatements));
 
-        ClassDeclarationSyntax @class = SyntaxFactory.ClassDeclaration(documentAsset.Name)
-            .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
-            .AddModifiers(SyntaxFactory.Token(SyntaxKind.PartialKeyword))
-            .AddMembers(documentVariable)
+        ClassDeclarationSyntax @class = ClassDeclaration(documentAsset.Name)
+            .AddModifiers(Token(SyntaxKind.PublicKeyword))
+            .AddModifiers(Token(SyntaxKind.PartialKeyword))
+            .AddMembers(
+                CreateDocumentVariable(),
+                CreateRootElementVariable()
+            )
             .AddMembers(propertyStatements)
             .AddMembers(
-                visualElementProperty,
+                CreateVisualElementRootProperty(),
+                CreateDefaultConstructor(documentAsset.Name),
+                CreateConstructorWithVisualElement(documentAsset.Name),
                 initializeMethod
             );
 
-        CompilationUnitSyntax compilationUnit = SyntaxFactory.CompilationUnit()
+        CompilationUnitSyntax compilationUnit = CompilationUnit()
             .AddUsings(
-                SyntaxFactory.UsingDirective(SyntaxFactory.IdentifierName("UnityEngine")),
-                SyntaxFactory.UsingDirective(SyntaxFactory.IdentifierName("UnityEngine.UIElements"))
+                UsingDirective(IdentifierName("UnityEngine")),
+                UsingDirective(IdentifierName("UnityEngine.UIElements"))
              )
             .AddMembers(@class);
 
@@ -59,13 +63,13 @@ internal class RosalinaBindingsGenerator : IRosalinaGeneartor
     private static MemberDeclarationSyntax CreateDocumentVariable()
     {
         string documentPropertyTypeName = typeof(UIDocument).Name;
-        NameSyntax serializeFieldName = SyntaxFactory.ParseName(typeof(SerializeField).Name);
+        NameSyntax serializeFieldName = ParseName(typeof(SerializeField).Name);
 
         FieldDeclarationSyntax documentField = RosalinaSyntaxFactory.CreateField(documentPropertyTypeName, DocumentFieldName, SyntaxKind.PrivateKeyword)
             .AddAttributeLists(
-                SyntaxFactory.AttributeList(
-                    SyntaxFactory.SingletonSeparatedList(
-                        SyntaxFactory.Attribute(serializeFieldName)
+                AttributeList(
+                    SingletonSeparatedList(
+                        Attribute(serializeFieldName)
                     )
                 )
             );
@@ -73,37 +77,75 @@ internal class RosalinaBindingsGenerator : IRosalinaGeneartor
         return documentField;
     }
 
+    private static MemberDeclarationSyntax CreateRootElementVariable()
+    {
+        return FieldDeclaration(
+                VariableDeclaration(IdentifierName(typeof(VisualElement).Name))
+                    .AddVariables(
+                        VariableDeclarator("_rootElement")
+                    )
+            )
+            .AddModifiers(Token(SyntaxKind.PrivateKeyword));
+    }
+
     private static MemberDeclarationSyntax CreateVisualElementRootProperty()
     {
-        string propertyTypeName = typeof(VisualElement).Name;
-        string documentFieldName = $"{DocumentFieldName}?";
-
-        return RosalinaSyntaxFactory.CreateProperty(propertyTypeName, RootVisualElementPropertyName, SyntaxKind.PublicKeyword)
-            .AddAccessorListAccessors(
-                SyntaxFactory.AccessorDeclaration(
-                    SyntaxKind.GetAccessorDeclaration,
-                    SyntaxFactory.Block(
-                        SyntaxFactory.ReturnStatement(
-                            SyntaxFactory.Token(SyntaxKind.ReturnKeyword),
-                            SyntaxFactory.MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                SyntaxFactory.IdentifierName(documentFieldName),
-                                SyntaxFactory.IdentifierName(UnityConstants.DocumentRootVisualElementFieldName)),
-                            SyntaxFactory.Token(SyntaxKind.SemicolonToken)
-                        )
+        return PropertyDeclaration(IdentifierName(typeof(VisualElement).Name), RootVisualElementPropertyName)
+            .AddModifiers(Token(SyntaxKind.PublicKeyword))
+            .WithExpressionBody(
+                ArrowExpressionClause(
+                    AssignmentExpression(
+                        SyntaxKind.CoalesceAssignmentExpression,
+                        IdentifierName("_rootElement"),
+                        IdentifierName($"{DocumentFieldName}?.rootVisualElement")
                     )
                 )
-            );
+            )
+            .WithSemicolonToken(Token(SyntaxKind.SemicolonToken));
     }
 
     private static MemberAccessExpressionSyntax CreateRootQueryMethodAccessor()
     {
-        return SyntaxFactory.MemberAccessExpression(
+        return MemberAccessExpression(
             SyntaxKind.SimpleMemberAccessExpression,
-            SyntaxFactory.IdentifierName($"{RootVisualElementPropertyName}?"),
-            SyntaxFactory.Token(SyntaxKind.DotToken),
-            SyntaxFactory.IdentifierName(UnityConstants.RootVisualElementQueryMethodName)
+            IdentifierName($"{RootVisualElementPropertyName}?"),
+            Token(SyntaxKind.DotToken),
+            IdentifierName(UnityConstants.RootVisualElementQueryMethodName)
         );
+    }
+
+    private static ConstructorDeclarationSyntax CreateDefaultConstructor(string className)
+    {
+        return ConstructorDeclaration(Identifier(className))
+            .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)))
+            .WithBody(Block());
+    }
+
+    private static ConstructorDeclarationSyntax CreateConstructorWithVisualElement(string className)
+    {
+        return ConstructorDeclaration(Identifier(className))
+            .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)))
+            .WithParameterList(
+                ParameterList(
+                    SingletonSeparatedList<ParameterSyntax>(
+                        Parameter(Identifier("root")).WithType(IdentifierName(typeof(VisualElement).Name))
+                    )
+                )
+            )
+            .WithBody(
+                Block(
+                    ExpressionStatement(
+                        AssignmentExpression(
+                            SyntaxKind.SimpleAssignmentExpression,
+                            IdentifierName("_rootElement"),
+                            IdentifierName("root")
+                        )
+                    ),
+                    ExpressionStatement(
+                        InvocationExpression(IdentifierName("InitializeDocument"))
+                    )
+                )
+            );
     }
 }
 
