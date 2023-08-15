@@ -6,6 +6,7 @@ using System.Xml.Linq;
 internal class RosalinaUXMLParser
 {
     private const string ElementAttributeName = "name";
+    private const string ElementAttributeTemplateName = "template";
     private const string EditorExtensionAttributeName = "editor-extension-mode";
 
     /// <summary>
@@ -27,7 +28,8 @@ internal class RosalinaUXMLParser
     {
         string type = xmlNode.Name.LocalName;
         string name = xmlNode.Attribute(ElementAttributeName)?.Value ?? string.Empty;
-        var node = new UxmlNode(type, name, xmlNode.Parent is null);
+        string template = xmlNode.Attribute(ElementAttributeTemplateName)?.Value ?? string.Empty;
+        var node = new UxmlNode(type, name, xmlNode.Parent is null, template);
 
         if (xmlNode.HasElements)
         {

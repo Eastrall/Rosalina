@@ -31,12 +31,17 @@ internal readonly struct UIProperty
     /// </summary>
     public string OriginalName { get; }
 
-    public UIProperty(string type, string name)
+    /// <summary>
+    /// Gets a boolean value that indicates if the UI property represents a custom component.
+    /// </summary>
+    public bool IsCustomComponent => TypeName == "Instance";
+
+    public UIProperty(UxmlNode uxmlNode)
     {
-        TypeName = type;
-        Type = UIPropertyTypes.GetUIElementType(type);
-        OriginalName = name;
-        Name = name.Contains('-') ? name.ToPascalCase() : OriginalName;
+        TypeName = uxmlNode.Type;
+        Type = UIPropertyTypes.GetUIElementType(uxmlNode.Type) ?? UIPropertyTypes.GetCustomUIElementType(uxmlNode.Template);
+        OriginalName = uxmlNode.Name;
+        Name = uxmlNode.Name.Contains('-') ? uxmlNode.Name.ToPascalCase() : OriginalName;
     }
 }
 

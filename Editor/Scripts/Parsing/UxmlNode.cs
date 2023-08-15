@@ -21,6 +21,11 @@ internal class UxmlNode
     public bool IsRoot { get; }
 
     /// <summary>
+    /// Gets the UXML template name in case of custom component; null otherwise.
+    /// </summary>
+    public string Template { get; }
+
+    /// <summary>
     /// Gets the UXML child nodes.
     /// </summary>
     public IList<UxmlNode> Children { get; } = new List<UxmlNode>();
@@ -36,11 +41,13 @@ internal class UxmlNode
     /// <param name="type">Node type.</param>
     /// <param name="name">Node name.</param>
     /// <param name="isRoot">Is root node.</param>
-    public UxmlNode(string type, string name, bool isRoot = false)
+    /// <param name="template">Node template in case of custom component.</param>
+    public UxmlNode(string type, string name, bool isRoot = false, string template = null)
     {
         Type = type;
         Name = name;
         IsRoot = isRoot;
+        Template = template;
     }
 }
 #endif

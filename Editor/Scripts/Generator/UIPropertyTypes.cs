@@ -1,6 +1,7 @@
 ﻿#if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 internal static class UIPropertyTypes
 {
@@ -26,12 +27,17 @@ internal static class UIPropertyTypes
         { "DropdownField", typeof(UnityEngine.UIElements.DropdownField) },
         { "RadioButton", typeof(UnityEngine.UIElements.RadioButton) },
         { "RadioButtonGroup", typeof(UnityEngine.UIElements.RadioButtonGroup) },
-        { "Image", typeof(UnityEngine.UIElements.Image) },
+        { "Image", typeof(UnityEngine.UIElements.Image) }
     };
 
     public static Type GetUIElementType(string uiElementName)
     {
         return _nativeUITypes.TryGetValue(uiElementName, out Type type) ? type : null;
+    }
+
+    public static Type GetCustomUIElementType(string templateName)
+    {
+        return AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.GetTypes()).FirstOrDefault(x => x.Name == templateName);
     }
 }
 

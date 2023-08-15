@@ -3,17 +3,18 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 internal static class RosalinaStatementSyntaxFactory
 {
     public static InitializationStatement[] GenerateInitializeStatements(UxmlDocument uxmlDocument, MemberAccessExpressionSyntax documentQueryMethodAccess)
     {
         var statements = new List<InitializationStatement>();
-        IEnumerable<UIProperty> properties = uxmlDocument.GetChildren().Select(x => new UIProperty(x.Type, x.Name)).ToList();
+        IEnumerable<UIProperty> properties = uxmlDocument.GetChildren().Select(x => new UIProperty(x)).ToList();
 
         if (CheckForDuplicateProperties(properties))
         {
@@ -30,35 +31,57 @@ internal static class RosalinaStatementSyntaxFactory
 
             PropertyDeclarationSyntax @property = RosalinaSyntaxFactory.CreateProperty(uiProperty.Type.Name, uiProperty.Name, SyntaxKind.PublicKeyword)
                 .AddAccessorListAccessors(
-                    SyntaxFactory.AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
-                        .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))
+                    AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
+                        .WithSemicolonToken(Token(SyntaxKind.SemicolonToken))
                 )
                 .AddAccessorListAccessors(
-                    SyntaxFactory.AccessorDeclaration(SyntaxKind.SetAccessorDeclaration)
-                        .AddModifiers(SyntaxFactory.Token(SyntaxKind.PrivateKeyword))
-                        .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))
+                    AccessorDeclaration(SyntaxKind.SetAccessorDeclaration)
+                        .AddModifiers(Token(SyntaxKind.PrivateKeyword))
+                        .WithSemicolonToken(Token(SyntaxKind.SemicolonToken))
                 );
 
-            var argumentList = SyntaxFactory.SeparatedList(new[]
+            SeparatedSyntaxList<ArgumentSyntax> argumentList = SeparatedList(new[]
             {
-                SyntaxFactory.Argument(
-                    SyntaxFactory.LiteralExpression(
+                Argument(
+                    LiteralExpression(
                         SyntaxKind.StringLiteralExpression,
-                        SyntaxFactory.Literal(uiProperty.OriginalName)
+                        Literal(uiProperty.OriginalName)
                     )
                 )
             });
-            var cast = SyntaxFactory.CastExpression(
-                SyntaxFactory.ParseTypeName(uiProperty.Type.Name),
-                SyntaxFactory.InvocationExpression(documentQueryMethodAccess, SyntaxFactory.ArgumentList(argumentList))
-            );
-            var statement = SyntaxFactory.ExpressionStatement(
-                SyntaxFactory.AssignmentExpression(
-                    SyntaxKind.SimpleAssignmentExpression,
-                    SyntaxFactory.IdentifierName(uiProperty.Name),
-                    cast
-                )
-            );
+            InvocationExpressionSyntax queryElementMethodInvocation = InvocationExpression(documentQueryMethodAccess, ArgumentList(argumentList));
+            ExpressionStatementSyntax statement;
+
+            if (!uiProperty.IsCustomComponent)
+            {
+                statement = ExpressionStatement(
+                    AssignmentExpression(
+                        SyntaxKind.SimpleAssignmentExpression,
+                        IdentifierName(uiProperty.Name),
+                        CastExpression(
+                            ParseTypeName(uiProperty.Type.Name),
+                            queryElementMethodInvocation
+                        )
+                    )
+                );
+            }
+            else
+            {
+                statement = ExpressionStatement(
+                    AssignmentExpression(
+                        SyntaxKind.SimpleAssignmentExpression,
+                        IdentifierName(uiProperty.Name),
+                        ObjectCreationExpression(IdentifierName(uiProperty.Type.Name))
+                            .WithArgumentList(
+                                ArgumentList(
+                                    SingletonSeparatedList(
+                                        Argument(queryElementMethodInvocation)
+                                    )
+                                )
+                            )
+                    )
+                );
+            }
 
             statements.Add(new InitializationStatement(statement, property));
         }
