@@ -40,7 +40,6 @@ internal class RosalinaBindingsGenerator : IRosalinaGeneartor
             .AddMembers(propertyStatements)
             .AddMembers(
                 CreateVisualElementRootProperty(),
-                CreateDefaultConstructor(documentAsset.Name),
                 CreateConstructorWithVisualElement(documentAsset.Name),
                 initializeMethod
             );
@@ -112,13 +111,6 @@ internal class RosalinaBindingsGenerator : IRosalinaGeneartor
             Token(SyntaxKind.DotToken),
             IdentifierName(UnityConstants.RootVisualElementQueryMethodName)
         );
-    }
-
-    private static ConstructorDeclarationSyntax CreateDefaultConstructor(string className)
-    {
-        return ConstructorDeclaration(Identifier(className))
-            .WithModifiers(TokenList(Token(SyntaxKind.PublicKeyword)))
-            .WithBody(Block());
     }
 
     private static ConstructorDeclarationSyntax CreateConstructorWithVisualElement(string className)
