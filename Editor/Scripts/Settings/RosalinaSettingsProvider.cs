@@ -1,15 +1,16 @@
 ﻿#if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
 using UnityEditor;
+using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 public class RosalinaSettingsProvider : SettingsProvider
 {
     private RosalinaSettings _settings;
+    private ReorderableList _fileList;
 
     public RosalinaSettingsProvider(string path, SettingsScope scopes, IEnumerable<string> keywords = null) 
         : base(path, scopes, keywords)
@@ -18,7 +19,42 @@ public class RosalinaSettingsProvider : SettingsProvider
 
     public override void OnActivate(string searchContext, VisualElement rootElement)
     {
-        _settings = RosalinaSettings.Current;
+        _settings = RosalinaSettings.instance;
+        _settings.Save();
+
+        _fileList = new ReorderableList(RosalinaSettings.instance.Files, typeof(RosalinaFileSetting), false, false, false, true);
+        _fileList.drawElementCallback += OnDrawElement;
+    }
+
+    public override void OnDeactivate()
+    {
+        if (_fileList != null)
+        {
+            _fileList.drawElementCallback -= OnDrawElement;
+        }
+
+        base.OnDeactivate();
+    }
+
+    private void OnDrawElement(Rect rect, int index, bool isActive, bool isFocused)
+    {
+        if (index < 0)
+        {
+            return;
+        }
+
+        if (_fileList.list[index] is RosalinaFileSetting element)
+        {
+            rect.y += 2;
+            element.Type = (RosalinaGenerationType)EditorGUI.EnumPopup(
+                 new Rect(rect.x, rect.y, 120, EditorGUIUtility.singleLineHeight),
+                 element.Type);
+            EditorGUI.BeginDisabledGroup(true);
+            EditorGUI.TextField(
+                new Rect(rect.x + 130, rect.y, rect.width - 200, EditorGUIUtility.singleLineHeight),
+                element.Path);
+            EditorGUI.EndDisabledGroup();
+        }
     }
 
     public override void OnGUI(string searchContext)
@@ -28,37 +64,13 @@ public class RosalinaSettingsProvider : SettingsProvider
             EditorGUI.BeginChangeCheck();
 
             _settings.IsEnabled = EditorGUILayout.Toggle("Is Enabled", _settings.IsEnabled);
+            EditorGUILayout.LabelField("Files");
+            _fileList.DoLayoutList();
 
             if (EditorGUI.EndChangeCheck())
             {
-                EditorUtility.SetDirty(_settings);
+                _settings.Save();
             }
-        }
-    }
-
-    public static RosalinaSettings GetOrCreateSettings()
-    {
-        string resourcePath = "Assets/Rosalina";
-        string settingsFileName = "RosalinaSettings.asset";
-        string settingsFilePath = Path.Combine(resourcePath, settingsFileName);
-
-        if (!AssetDatabase.IsValidFolder(resourcePath))
-        {
-            AssetDatabase.CreateFolder("Assets", "Rosalina");
-        }
-
-        if (File.Exists(settingsFilePath))
-        {
-            return AssetDatabase.LoadAssetAtPath<RosalinaSettings>(settingsFilePath);
-        }
-        else
-        {
-            RosalinaSettings newSettings = ScriptableObject.CreateInstance<RosalinaSettings>();
-            AssetDatabase.CreateAsset(newSettings, settingsFilePath);
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-
-            return newSettings;
         }
     }
 

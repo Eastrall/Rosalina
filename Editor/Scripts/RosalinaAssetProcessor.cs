@@ -11,14 +11,14 @@ public class RosalinaAssetProcessor : AssetPostprocessor
 
     private static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromPath)
     {
-        if (!RosalinaSettings.Current.IsEnabled)
+        if (!RosalinaSettings.instance.IsEnabled)
         {
             return;
         }
 
         string[] uiFilesChanged = importedAssets
-            .Where(x => x.StartsWith("Assets"))
-            .Where(x => Path.GetExtension(x) == UIDocumentExtension)
+            .Where(assetPath => assetPath.StartsWith("Assets") && RosalinaSettings.instance.ContainsFile(assetPath))
+            .Where(assetPath => Path.GetExtension(assetPath) == UIDocumentExtension)
             .ToArray();
 
         if (uiFilesChanged.Length > 0)

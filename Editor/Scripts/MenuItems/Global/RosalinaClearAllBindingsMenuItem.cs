@@ -12,7 +12,7 @@ public class RosalinaClearAllBindingsMenuItem
     [MenuItem(MenuItemPath, true)]
     public static bool ClearAllBindingsValidation()
     {
-        return RosalinaSettings.Current.IsEnabled;
+        return RosalinaSettings.instance.IsEnabled;
     }
 
     [MenuItem(MenuItemPath, priority = 2)]

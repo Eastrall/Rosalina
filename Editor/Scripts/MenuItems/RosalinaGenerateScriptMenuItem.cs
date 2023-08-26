@@ -12,10 +12,10 @@ public class RosalinaGenerateScriptMenuItem
     [MenuItem(MenuItemPath, true)]
     public static bool GenerateUIScriptValidation()
     {
-        return RosalinaSettings.Current.IsEnabled && Selection.activeObject != null && Selection.activeObject.GetType() == typeof(VisualTreeAsset);
+        return RosalinaSettings.instance.IsEnabled && Selection.activeObject != null && Selection.activeObject.GetType() == typeof(VisualTreeAsset);
     }
 
-    [MenuItem(MenuItemPath, priority = 21)]
+    [MenuItem(MenuItemPath, priority = 23)]
     public static void GenerateUIScript()
     {
         string assetPath = AssetDatabase.GetAssetPath(Selection.activeObject);

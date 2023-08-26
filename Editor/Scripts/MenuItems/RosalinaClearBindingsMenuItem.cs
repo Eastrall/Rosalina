@@ -12,10 +12,10 @@ public class RosalinaClearBindingsMenuItem
     [MenuItem(MenuItemPath, true)]
     public static bool ClearBindingsValidation()
     {
-        return RosalinaSettings.Current.IsEnabled && Selection.activeObject != null && Selection.activeObject.GetType() == typeof(VisualTreeAsset);
+        return RosalinaSettings.instance.IsEnabled && Selection.activeObject != null && Selection.activeObject.GetType() == typeof(VisualTreeAsset);
     }
 
-    [MenuItem(MenuItemPath, priority = 20)]
+    [MenuItem(MenuItemPath, priority = 21)]
     public static void ClearBindings()
     {
         string assetPath = AssetDatabase.GetAssetPath(Selection.activeObject);

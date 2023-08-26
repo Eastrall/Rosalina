@@ -12,7 +12,7 @@ public class RosalinaGenerateAllBindingsMenuItem
     [MenuItem(MenuItemPath, true)]
     public static bool GenerateAllBindingsValidation()
     {
-        return RosalinaSettings.Current.IsEnabled;
+        return RosalinaSettings.instance.IsEnabled;
     }
 
     [MenuItem(MenuItemPath, priority = 1)]

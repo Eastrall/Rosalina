@@ -11,7 +11,7 @@ public class RosalinaGenerateBindingsMenuItem
     [MenuItem(MenuItemPath, true)]
     private static bool GenerateUIBindingsValidation()
     {
-        return RosalinaSettings.Current.IsEnabled && Selection.activeObject != null && Selection.activeObject.GetType() == typeof(VisualTreeAsset);
+        return RosalinaSettings.instance.IsEnabled && Selection.activeObject != null && Selection.activeObject.GetType() == typeof(VisualTreeAsset);
     }
 
     [MenuItem(MenuItemPath, priority = 22)]
