@@ -7,11 +7,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UIElements;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 internal static class RosalinaStatementSyntaxFactory
 {
-    public static InitializationStatement[] GenerateInitializeStatements(UxmlDocument uxmlDocument, MemberAccessExpressionSyntax documentQueryMethodAccess)
+    public static InitializationStatement[] GenerateInitializeStatements(UxmlDocument uxmlDocument, string methodAccessor)
     {
         var statements = new List<InitializationStatement>();
         IEnumerable<UIProperty> properties = uxmlDocument.GetChildren().Select(x => new UIProperty(x)).ToList();
@@ -29,7 +30,8 @@ internal static class RosalinaStatementSyntaxFactory
                 continue;
             }
 
-            PropertyDeclarationSyntax @property = RosalinaSyntaxFactory.CreateProperty(uiProperty.Type.Name, uiProperty.Name, SyntaxKind.PublicKeyword)
+            PropertyDeclarationSyntax @property = PropertyDeclaration(ParseName(uiProperty.Type.Name), uiProperty.Name)
+                .AddModifiers(Token(SyntaxKind.PublicKeyword))
                 .AddAccessorListAccessors(
                     AccessorDeclaration(SyntaxKind.GetAccessorDeclaration)
                         .WithSemicolonToken(Token(SyntaxKind.SemicolonToken))
@@ -40,32 +42,9 @@ internal static class RosalinaStatementSyntaxFactory
                         .WithSemicolonToken(Token(SyntaxKind.SemicolonToken))
                 );
 
-            SeparatedSyntaxList<ArgumentSyntax> argumentList = SeparatedList(new[]
-            {
-                Argument(
-                    LiteralExpression(
-                        SyntaxKind.StringLiteralExpression,
-                        Literal(uiProperty.OriginalName)
-                    )
-                )
-            });
-            InvocationExpressionSyntax queryElementMethodInvocation = InvocationExpression(documentQueryMethodAccess, ArgumentList(argumentList));
             ExpressionStatementSyntax statement;
 
-            if (!uiProperty.IsCustomComponent)
-            {
-                statement = ExpressionStatement(
-                    AssignmentExpression(
-                        SyntaxKind.SimpleAssignmentExpression,
-                        IdentifierName(uiProperty.Name),
-                        CastExpression(
-                            ParseTypeName(uiProperty.Type.Name),
-                            queryElementMethodInvocation
-                        )
-                    )
-                );
-            }
-            else
+            if (uiProperty.IsCustomComponent)
             {
                 statement = ExpressionStatement(
                     AssignmentExpression(
@@ -75,15 +54,30 @@ internal static class RosalinaStatementSyntaxFactory
                             .WithArgumentList(
                                 ArgumentList(
                                     SingletonSeparatedList(
-                                        Argument(queryElementMethodInvocation)
+                                        Argument(
+                                            GetQueryElementInvocation(methodAccessor, typeof(VisualElement).Name, uiProperty.OriginalName)
+                                        )
                                     )
                                 )
                             )
                     )
                 );
             }
+            else
+            {
+                statement = ExpressionStatement(
+                    AssignmentExpression(
+                        SyntaxKind.SimpleAssignmentExpression,
+                        IdentifierName(uiProperty.Name),
+                        GetQueryElementInvocation(methodAccessor, uiProperty.Type.Name, uiProperty.OriginalName)
+                    )
+                );
+            }
 
-            statements.Add(new InitializationStatement(statement, property));
+            if (statement != null)
+            {
+                statements.Add(new InitializationStatement(statement, property));
+            }
         }
 
         return statements.ToArray();
@@ -105,6 +99,29 @@ internal static class RosalinaStatementSyntaxFactory
         }
 
         return containsDuplicateProperties;
+    }
+
+    private static InvocationExpressionSyntax GetQueryElementInvocation(string methodAccessor, string elementTypeName, string elementName)
+    {
+        return InvocationExpression(
+            GenericName(methodAccessor)
+                .WithTypeArgumentList(
+                    TypeArgumentList(
+                        SingletonSeparatedList<TypeSyntax>(
+                            IdentifierName(elementTypeName)
+                        )
+                    )
+                ),
+            ArgumentList(
+                SingletonSeparatedList(
+                    Argument(
+                        LiteralExpression(
+                            SyntaxKind.StringLiteralExpression,
+                            Literal(elementName)
+                        )
+                    )
+                )
+            ));
     }
 }
 

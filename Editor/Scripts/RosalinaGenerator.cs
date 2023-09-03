@@ -1,4 +1,5 @@
 ﻿#if UNITY_EDITOR
+using System;
 using System.IO;
 using UnityEngine;
 
@@ -39,9 +40,22 @@ internal static class RosalinaGenerator
     /// <returns>Rosalina generation result.</returns>
     public static void GenerateBindings(UIDocumentAsset document, string outputFile)
     {
-        IRosalinaGeneartor generator = document.UxmlDocument.IsEditorExtension ? 
-            new RosalinaEditorWindowBindingsGeneartor() : 
-            new RosalinaBindingsGenerator();
+        RosalinaFileSetting fileSetting = RosalinaSettings.instance.GetFileSetting(document.FullPath);
+
+        if (fileSetting == null)
+        {
+            Debug.LogWarning($"Cannot find '{document.Name}' in Rosalina's configuration. Ensure that binding generation is enabled for this file. " +
+                $"Right-Click on the UXML file > Rosalina > Enable Binding Generation");
+            return;
+        }
+
+        IRosalinaCodeGeneartor generator = fileSetting.Type switch
+        {
+            RosalinaGenerationType.Document => new RosalinaDocumentBindingsGenerator(),
+            RosalinaGenerationType.Component => throw new NotImplementedException(),
+            RosalinaGenerationType.EditorWindow => new RosalinaEditorWindowBindingsGeneartor(),
+            _ => throw new NotImplementedException()
+        };
 
         Debug.Log($"[Rosalina]: Generating UI bindings for {document.FullPath}");
 
@@ -59,9 +73,22 @@ internal static class RosalinaGenerator
     /// <returns>Rosalina generation result.</returns>
     public static void GenerateScript(UIDocumentAsset document, string outputFile)
     {
-        IRosalinaGeneartor generator = document.UxmlDocument.IsEditorExtension ?
-            new RosalinaEditorWindowScriptGenerator() :
-            new RosalinaScriptGenerator();
+        RosalinaFileSetting fileSetting = RosalinaSettings.instance.GetFileSetting(document.FullPath);
+
+        if (fileSetting == null)
+        {
+            Debug.LogWarning($"Cannot find '{document.Name}' in Rosalina's configuration. Ensure that binding generation is enabled for this file. " +
+                $"Right-Click on the UXML file > Rosalina > Enable Binding Generation");
+            return;
+        }
+
+        IRosalinaCodeGeneartor generator = fileSetting.Type switch
+        {
+            RosalinaGenerationType.Document => new RosalinaDocumentScriptGenerator(),
+            RosalinaGenerationType.Component => throw new NotImplementedException(),
+            RosalinaGenerationType.EditorWindow => new RosalinaEditorWindowScriptGenerator(),
+            _ => throw new NotImplementedException()
+        };
 
         Debug.Log($"[Rosalina]: Generating UI script for {outputFile}");
 

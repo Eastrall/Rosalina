@@ -38,10 +38,7 @@ public class RosalinaSettings : ScriptableSingleton<RosalinaSettings>
     /// <summary>
     /// Save the settings.
     /// </summary>
-    public void Save()
-    {
-        Save(true);
-    }
+    public void Save() => Save(true);
 
     /// <summary>
     /// Gets a file setting based on the given path.

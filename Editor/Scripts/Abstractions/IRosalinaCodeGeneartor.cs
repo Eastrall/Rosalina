@@ -1,6 +1,6 @@
 ﻿#if UNITY_EDITOR
 
-internal interface IRosalinaGeneartor
+internal interface IRosalinaCodeGeneartor
 {
     RosalinaGenerationResult Generate(UIDocumentAsset documentAsset);
 }
