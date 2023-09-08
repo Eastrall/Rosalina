@@ -46,10 +46,10 @@ public class RosalinaSettingsProvider : SettingsProvider
         if (_fileList.list[index] is RosalinaFileSetting element)
         {
             rect.y += 2;
+            EditorGUI.BeginDisabledGroup(true);
             element.Type = (RosalinaGenerationType)EditorGUI.EnumPopup(
                  new Rect(rect.x, rect.y, 120, EditorGUIUtility.singleLineHeight),
                  element.Type);
-            EditorGUI.BeginDisabledGroup(true);
             EditorGUI.TextField(
                 new Rect(rect.x + 130, rect.y, rect.width - 200, EditorGUIUtility.singleLineHeight),
                 element.Path);
