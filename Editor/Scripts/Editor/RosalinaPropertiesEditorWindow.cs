@@ -19,6 +19,12 @@ public class RosalinaPropertiesEditorWindow : EditorWindow
 
     public EnumField GeneratorTypeSelector { get; private set; }
 
+    public Button GenerateBindingsButton { get; private set; }
+
+    public Button GenerateScriptButton { get; private set; }
+
+    public Button ClearBindingsButton { get; private set; }
+
     private void OnEnable()
     {
     }
@@ -27,6 +33,9 @@ public class RosalinaPropertiesEditorWindow : EditorWindow
     {
         EnableFile.UnregisterValueChangedCallback(OnEnableFileChanged);
         GeneratorTypeSelector.UnregisterValueChangedCallback(OnGeneratorTypeSelectionChanged);
+        GenerateBindingsButton.clicked -= OnGenerateBindings;
+        GenerateScriptButton.clicked -= OnGenerateScripts;
+        ClearBindingsButton.clicked -= OnClearBindings;
     }
 
     private void OnSelectionChange()
@@ -56,10 +65,16 @@ public class RosalinaPropertiesEditorWindow : EditorWindow
         BasicSettingsContainer = rootVisualElement.Q<VisualElement>("BasicSettingsContainer");
         EnableFile = rootVisualElement.Q<Toggle>("EnableFile");
         GeneratorTypeSelector = rootVisualElement.Q<EnumField>("GeneratorTypeSelector");
+        GenerateBindingsButton = rootVisualElement.Q<Button>("GenerateBindingsButton");
+        GenerateScriptButton = rootVisualElement.Q<Button>("GenerateScriptButton");
+        ClearBindingsButton = rootVisualElement.Q<Button>("ClearBindingsButton");
 
         OnSelectionChange();
         EnableFile.RegisterValueChangedCallback(OnEnableFileChanged);
         GeneratorTypeSelector.RegisterValueChangedCallback(OnGeneratorTypeSelectionChanged);
+        GenerateBindingsButton.clicked += OnGenerateBindings;
+        GenerateScriptButton.clicked += OnGenerateScripts;
+        ClearBindingsButton.clicked += OnClearBindings;
     }
 
     private void RefreshFileSettings()
@@ -109,6 +124,29 @@ public class RosalinaPropertiesEditorWindow : EditorWindow
         }
     }
 
+    private void OnGenerateBindings()
+    {
+        string assetPath = AssetDatabase.GetAssetPath(Selection.activeObject);
+        var document = new UIDocumentAsset(assetPath);
+
+        document.GenerateBindings();
+        AssetDatabase.Refresh();
+    }
+
+    private void OnGenerateScripts()
+    {
+        Debug.LogWarning($"Generate script: Not implemented.");
+    }
+
+    private void OnClearBindings()
+    {
+        string assetPath = AssetDatabase.GetAssetPath(Selection.activeObject);
+        var document = new UIDocumentAsset(assetPath);
+
+        document.ClearBindings();
+        AssetDatabase.Refresh();
+    }
+
     private void OnSettingsChanged()
     {
         RosalinaSettings.instance.Save();
@@ -121,7 +159,7 @@ public class RosalinaPropertiesEditorWindow : EditorWindow
         return RosalinaSettings.instance.IsEnabled && Selection.activeObject != null && Selection.activeObject.GetType() == typeof(VisualTreeAsset);
     }
 
-    [MenuItem("Assets/Rosalina/Properties...")]
+    [MenuItem("Assets/Rosalina/Properties...", priority = 1200)]
     public static void ShowWindow()
     {
         if (HasOpenInstances<RosalinaPropertiesEditorWindow>())

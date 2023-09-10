@@ -14,14 +14,14 @@ internal class RosalinaEditorWindowBindingsGeneartor : IRosalinaCodeGeneartor
 {
     private const string OnCreateGUIHookName = "OnCreateGUI";
 
-    public RosalinaGenerationResult Generate(UIDocumentAsset documentAsset)
+    public RosalinaGenerationResult Generate(UIDocumentAsset document)
     {
-        if (documentAsset is null)
+        if (document is null)
         {
-            throw new ArgumentNullException(nameof(documentAsset), "Cannot generate binding with a null document asset.");
+            throw new ArgumentNullException(nameof(document), "Cannot generate binding with a null document asset.");
         }
 
-        InitializationStatement[] statements = RosalinaStatementSyntaxFactory.GenerateInitializeStatements(documentAsset.UxmlDocument, $"rootVisualElement?.Q");
+        InitializationStatement[] statements = RosalinaStatementSyntaxFactory.GenerateInitializeStatements(document, $"rootVisualElement?.Q");
         PropertyDeclarationSyntax[] propertyStatements = statements.Select(x => x.Property).ToArray();
         StatementSyntax[] initializationStatements = statements.Select(x => x.Statement).ToArray();
 
@@ -32,7 +32,7 @@ internal class RosalinaEditorWindowBindingsGeneartor : IRosalinaCodeGeneartor
                 UsingDirective(IdentifierName("UnityEngine.UIElements"))
             )
             .AddMembers(
-                ClassDeclaration(documentAsset.Name)
+                ClassDeclaration(document.Name)
                     .AddModifiers(
                         Token(SyntaxKind.PublicKeyword),
                         Token(SyntaxKind.PartialKeyword)
@@ -51,7 +51,7 @@ internal class RosalinaEditorWindowBindingsGeneartor : IRosalinaCodeGeneartor
                                 Block(
                                     new[]
                                     {
-                                         CreateVisualTreeAssetVariable(documentAsset.FullPath),
+                                         CreateVisualTreeAssetVariable(document.FullPath),
                                          CreateVisualElementVariable(),
                                          AddVisualElementToRootElement()
                                     }

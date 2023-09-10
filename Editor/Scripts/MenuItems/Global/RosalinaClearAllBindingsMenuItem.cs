@@ -15,7 +15,7 @@ public class RosalinaClearAllBindingsMenuItem
         return RosalinaSettings.instance.IsEnabled;
     }
 
-    [MenuItem(MenuItemPath, priority = 2)]
+    [MenuItem(MenuItemPath, priority = 1001)]
     public static void ClearAllBindings()
     {
         try

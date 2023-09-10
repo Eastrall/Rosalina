@@ -12,21 +12,21 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 internal static class RosalinaStatementSyntaxFactory
 {
-    public static InitializationStatement[] GenerateInitializeStatements(UxmlDocument uxmlDocument, string methodAccessor)
+    public static InitializationStatement[] GenerateInitializeStatements(UIDocumentAsset document, string methodAccessor)
     {
         var statements = new List<InitializationStatement>();
-        IEnumerable<UIProperty> properties = uxmlDocument.GetChildren().Select(x => new UIProperty(x)).ToList();
+        IEnumerable<UIProperty> properties = document.GetChildren().Select(x => new UIProperty(x)).ToList();
 
         if (CheckForDuplicateProperties(properties))
         {
-            throw new InvalidProgramException($"Failed to generate bindings for document: {uxmlDocument.Name} because of duplicate properties.");
+            throw new InvalidProgramException($"Failed to generate bindings for document: {document.Name} because of duplicate properties.");
         }
 
         foreach (UIProperty uiProperty in properties)
         {
             if (uiProperty.Type is null)
             {
-                Debug.LogWarning($"[Rosalina]: Failed to get property type: '{uiProperty.TypeName}', field: '{uiProperty.Name}' for document '{uxmlDocument.Path}'. Property will be ignored.");
+                Debug.LogWarning($"[Rosalina]: Failed to get property type: '{uiProperty.TypeName}', field: '{uiProperty.Name}' for document '{document.Path}'. Property will be ignored.");
                 continue;
             }
 
