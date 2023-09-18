@@ -135,7 +135,16 @@ public class RosalinaPropertiesEditorWindow : EditorWindow
 
     private void OnGenerateScripts()
     {
-        Debug.LogWarning($"Generate script: Not implemented.");
+        string assetPath = AssetDatabase.GetAssetPath(Selection.activeObject);
+        var document = new UIDocumentAsset(assetPath);
+
+        bool bindingsGenerated = RosalinaScriptGeneratorUtilities.TryGenerateBindings(document);
+        bool scriptGenerated = RosalinaScriptGeneratorUtilities.TryGenerateScript(document);
+
+        if (bindingsGenerated || scriptGenerated)
+        {
+            AssetDatabase.Refresh();
+        }
     }
 
     private void OnClearBindings()
@@ -150,7 +159,6 @@ public class RosalinaPropertiesEditorWindow : EditorWindow
     private void OnSettingsChanged()
     {
         RosalinaSettings.instance.Save();
-
     }
 
     [MenuItem("Assets/Rosalina/Properties...", validate = true)]

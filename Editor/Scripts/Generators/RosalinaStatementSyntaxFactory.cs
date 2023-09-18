@@ -15,7 +15,7 @@ internal static class RosalinaStatementSyntaxFactory
     public static InitializationStatement[] GenerateInitializeStatements(UIDocumentAsset document, string methodAccessor)
     {
         var statements = new List<InitializationStatement>();
-        IEnumerable<UIProperty> properties = document.GetChildren().Select(x => new UIProperty(x)).ToList();
+        IEnumerable<UIProperty> properties = document.GetChildren().Where(x => !x.IsTemplate).Select(x => new UIProperty(x)).ToList();
 
         if (CheckForDuplicateProperties(properties))
         {
@@ -26,7 +26,15 @@ internal static class RosalinaStatementSyntaxFactory
         {
             if (uiProperty.Type is null)
             {
-                Debug.LogWarning($"[Rosalina]: Failed to get property type: '{uiProperty.TypeName}', field: '{uiProperty.Name}' for document '{document.Path}'. Property will be ignored.");
+                if (uiProperty.IsCustomComponent)
+                {
+                    Debug.LogWarning($"[Rosalina]: Failed to get custom component type: '{uiProperty.TemplateName}' for document '{document.FullPath}'. Property will be ignored.");
+                }
+                else
+                {
+                    Debug.LogWarning($"[Rosalina]: Failed to get property type: '{uiProperty.TypeName}', field: '{uiProperty.Name}' for document '{document.FullPath}'. Property will be ignored.");
+                }
+
                 continue;
             }
 
@@ -99,6 +107,11 @@ internal static class RosalinaStatementSyntaxFactory
         }
 
         return containsDuplicateProperties;
+    }
+
+    private static bool CustomComponentExists(UIProperty uiProperty)
+    {
+        return true;
     }
 
     private static InvocationExpressionSyntax GetQueryElementInvocation(string methodAccessor, string elementTypeName, string elementName)

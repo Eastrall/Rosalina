@@ -76,7 +76,7 @@ internal class UIDocumentAsset
         IRosalinaCodeGeneartor generator = fileSetting.Type switch
         {
             RosalinaGenerationType.Document => new RosalinaDocumentBindingsGenerator(),
-            RosalinaGenerationType.Component => throw new NotImplementedException(),
+            RosalinaGenerationType.Component => new RosalinaComponentBindingsGenerator(),
             RosalinaGenerationType.EditorWindow => new RosalinaEditorWindowBindingsGeneartor(),
             _ => throw new NotImplementedException()
         };
@@ -102,7 +102,7 @@ internal class UIDocumentAsset
         IRosalinaCodeGeneartor generator = fileSetting.Type switch
         {
             RosalinaGenerationType.Document => new RosalinaDocumentScriptGenerator(),
-            RosalinaGenerationType.Component => throw new NotImplementedException(),
+            RosalinaGenerationType.Component => new RosalinaComponentScriptGenerator(),
             RosalinaGenerationType.EditorWindow => new RosalinaEditorWindowScriptGenerator(),
             _ => throw new NotImplementedException()
         };

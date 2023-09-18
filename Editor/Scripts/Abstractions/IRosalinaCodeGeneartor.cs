@@ -2,7 +2,7 @@
 
 internal interface IRosalinaCodeGeneartor
 {
-    RosalinaGenerationResult Generate(UIDocumentAsset documentAsset);
+    RosalinaGenerationResult Generate(UIDocumentAsset document);
 }
 
 #endif

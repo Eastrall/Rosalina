@@ -36,12 +36,18 @@ internal readonly struct UIProperty
     /// </summary>
     public bool IsCustomComponent => TypeName == "Instance";
 
+    /// <summary>
+    /// Gets the custom component template name.
+    /// </summary>
+    public string TemplateName { get; }
+
     public UIProperty(UxmlNode uxmlNode)
     {
         TypeName = uxmlNode.Type;
         Type = UIPropertyTypes.GetUIElementType(uxmlNode.Type) ?? UIPropertyTypes.GetCustomUIElementType(uxmlNode.Template);
         OriginalName = uxmlNode.Name;
         Name = uxmlNode.Name.Contains('-') ? uxmlNode.Name.ToPascalCase() : OriginalName;
+        TemplateName = uxmlNode.Template;
     }
 }
 

@@ -37,4 +37,5 @@ internal static class RosalinaEditorUtilities
     /// </summary>
     public static void HideProgressBar() => EditorUtility.ClearProgressBar();
 }
+
 #endif
