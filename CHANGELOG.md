@@ -10,6 +10,7 @@
 * Change bindings initialization method to generic methods. (#26) (PR #27)
 * Add custom component support (#25) (PR #27)
 * Rosalina settings improvement
+
 ## 3.0.1 - 2023-07-16
 
 ### 🐛Bug fixes
