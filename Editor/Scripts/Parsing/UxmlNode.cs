@@ -1,6 +1,8 @@
 ﻿#if UNITY_EDITOR
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Xml.Linq;
 
 [DebuggerDisplay("{Type} (name='{Name}')")]
 internal class UxmlNode
@@ -21,6 +23,11 @@ internal class UxmlNode
     public bool IsRoot { get; }
 
     /// <summary>
+    /// Gets or sets if the current node is a template.
+    /// </summary>
+    public bool IsTemplate => Type == "Template";
+
+    /// <summary>
     /// Gets the UXML template name in case of custom component; null otherwise.
     /// </summary>
     public string Template { get; }
@@ -36,18 +43,21 @@ internal class UxmlNode
     public bool HasName => !string.IsNullOrEmpty(Name);
 
     /// <summary>
-    /// Creates a new <see cref="UxmlNode"/> instance.
+    /// Gets the node attributes.
     /// </summary>
-    /// <param name="type">Node type.</param>
-    /// <param name="name">Node name.</param>
-    /// <param name="isRoot">Is root node.</param>
-    /// <param name="template">Node template in case of custom component.</param>
-    public UxmlNode(string type, string name, bool isRoot = false, string template = null)
+    public IReadOnlyDictionary<string, string> Attributes { get; }
+
+    /// <summary>
+    /// Creates a new <see cref="UxmlNode"/> based on the given XML node.
+    /// </summary>
+    /// <param name="xmlNode">Current XML node.</param>
+    public UxmlNode(XElement xmlNode)
     {
-        Type = type;
-        Name = name;
-        IsRoot = isRoot;
-        Template = template;
+        Type = xmlNode.Name.LocalName;
+        Name = xmlNode.Attribute("name")?.Value ?? string.Empty;
+        IsRoot = xmlNode.Parent == null;
+        Template = xmlNode.Attribute("template")?.Value ?? string.Empty;
+        Attributes = xmlNode.Attributes().ToDictionary(x => x.Name.LocalName, x => x.Value);
     }
 }
 #endif

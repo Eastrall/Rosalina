@@ -1,0 +1,17 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement name="Container" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); padding-left: 12px; padding-right: 12px; padding-top: 12px; padding-bottom: 12px;">
+        <ui:Label tabindex="-1" text="Basic settings" display-tooltip-when-elided="true" name="BasicSettingsTitleLabel" style="-unity-font-style: bold; font-size: 12px;" />
+        <ui:VisualElement name="FileSettingsContainer" style="flex-grow: 0; background-color: rgba(0, 0, 0, 0); margin-top: 8px;">
+            <ui:Toggle label="Enable" name="EnableFile" tooltip="Includes the current UXML file into the Rosalina code generation pipeline." />
+            <ui:VisualElement name="BasicSettingsContainer" style="flex-grow: 0; background-color: rgba(0, 0, 0, 0); margin-top: 0;">
+                <ui:EnumField label="Generator type" type="RosalinaGenerationType, com.eastylabs.rosalina" name="GeneratorTypeSelector" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:Label tabindex="-1" text="Tools" display-tooltip-when-elided="true" name="ToolsTitleLabel" style="-unity-font-style: bold; font-size: 12px; margin-top: 8px;" />
+        <ui:VisualElement name="ToolsContainer" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); margin-top: 8px;">
+            <ui:Button text="Generate bindings" display-tooltip-when-elided="true" name="GenerateBindingsButton" />
+            <ui:Button text="Generate script" display-tooltip-when-elided="true" name="GenerateScriptButton" />
+            <ui:Button text="Clear bindings" display-tooltip-when-elided="true" name="ClearBindingsButton" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
