@@ -1,5 +1,15 @@
 # Rosalina CHANGELOG
 
+## 4.0.0 - 2023-09-23
+
+### 🚀 Enhancement
+
+* Bindings/Script generators code cleaning
+* Added manual generation (#26) (PR #27)
+* Added UXML custom properties window for configuring how Rosalina should behave. (#26) (PR #27)
+* Change bindings initialization method to generic methods. (#26) (PR #27)
+* Add custom component support (#25) (PR #27)
+* Rosalina settings improvement
 ## 3.0.1 - 2023-07-16
 
 ### 🐛Bug fixes
