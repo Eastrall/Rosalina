@@ -1,35 +1,26 @@
 ﻿#if UNITY_EDITOR
-using System;
 using System.IO;
 using System.Xml.Linq;
 
-internal class RosalinaUXMLParser
+internal sealed class RosalinaUXMLParser
 {
-    private const string ElementAttributeName = "name";
-    private const string ElementAttributeTemplateName = "template";
-    private const string EditorExtensionAttributeName = "editor-extension-mode";
-
     /// <summary>
     /// Parses the given UI document path.
     /// </summary>
     /// <param name="uiDocumentPath">UI Document path.</param>
-    /// <returns>The UXML document.</returns>
-    public static UxmlDocument ParseUIDocument(string uiDocumentPath)
+    /// <returns>The UXML root node.</returns>
+    public static UxmlNode ParseUIDocument(string uiDocumentPath)
     {
         using FileStream documentStream = File.OpenRead(uiDocumentPath);
         XElement root = XElement.Load(documentStream);
-        bool isEditorExtension = Convert.ToBoolean(root.Attribute(EditorExtensionAttributeName)?.Value);
         UxmlNode rootNode = ParseUxmlNode(root);
 
-        return new UxmlDocument(Path.GetFileName(uiDocumentPath), uiDocumentPath, rootNode, isEditorExtension);
+        return rootNode;
     }
 
     private static UxmlNode ParseUxmlNode(XElement xmlNode)
     {
-        string type = xmlNode.Name.LocalName;
-        string name = xmlNode.Attribute(ElementAttributeName)?.Value ?? string.Empty;
-        string template = xmlNode.Attribute(ElementAttributeTemplateName)?.Value ?? string.Empty;
-        var node = new UxmlNode(type, name, xmlNode.Parent is null, template);
+        var node = new UxmlNode(xmlNode);
 
         if (xmlNode.HasElements)
         {
