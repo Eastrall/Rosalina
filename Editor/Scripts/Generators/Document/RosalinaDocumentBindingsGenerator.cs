@@ -56,6 +56,21 @@ internal class RosalinaDocumentBindingsGenerator : IRosalinaCodeGeneartor
             .NormalizeWhitespace()
             .ToFullString();
 
+        if (!string.IsNullOrEmpty(RosalinaSettings.instance.Namespace))
+        {
+            CompilationUnit()
+                .AddUsings(
+                    UsingDirective(IdentifierName("UnityEngine")),
+                    UsingDirective(IdentifierName("UnityEngine.UIElements"))
+                )
+                .AddMembers(
+                    NamespaceDeclaration(IdentifierName(RosalinaSettings.instance.Namespace))
+                    .AddMembers(@class)
+                )
+                .NormalizeWhitespace()
+                .ToFullString();
+        }
+
         return new RosalinaGenerationResult(code);
     }
 
