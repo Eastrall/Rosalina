@@ -23,7 +23,8 @@ internal class RosalinaDocumentBindingsGenerator : IRosalinaCodeGeneartor
             throw new ArgumentNullException(nameof(document), "Cannot generate binding with a null document asset.");
         }
 
-        InitializationStatement[] statements = RosalinaStatementSyntaxFactory.GenerateInitializeStatements(document, $"{RootVisualElementPropertyName}?.Q");
+        InitializationStatement[] statements =
+            RosalinaStatementSyntaxFactory.GenerateInitializeStatements(document, $"{RootVisualElementPropertyName}?.Q");
         PropertyDeclarationSyntax[] propertyStatements = statements.Select(x => x.Property).ToArray();
         StatementSyntax[] initializationStatements = statements.Select(x => x.Statement).ToArray();
 
@@ -35,7 +36,7 @@ internal class RosalinaDocumentBindingsGenerator : IRosalinaCodeGeneartor
                 Block(initializationStatements)
             );
 
-        ClassDeclarationSyntax @class = ClassDeclaration(document.Name)
+        ClassDeclarationSyntax classDeclaration = ClassDeclaration(document.Name)
             .AddModifiers(Token(SyntaxKind.PublicKeyword))
             .AddModifiers(Token(SyntaxKind.PartialKeyword))
             .AddMembers(
@@ -47,30 +48,12 @@ internal class RosalinaDocumentBindingsGenerator : IRosalinaCodeGeneartor
                 initializeMethod
             );
 
-        string code = CompilationUnit()
-            .AddUsings(
-                UsingDirective(IdentifierName("UnityEngine")),
-                UsingDirective(IdentifierName("UnityEngine.UIElements"))
-             )
-            .AddMembers(@class)
-            .NormalizeWhitespace()
-            .ToFullString();
-
-        if (!string.IsNullOrEmpty(RosalinaSettings.instance.Namespace))
-        {
-            CompilationUnit()
-                .AddUsings(
-                    UsingDirective(IdentifierName("UnityEngine")),
-                    UsingDirective(IdentifierName("UnityEngine.UIElements"))
-                )
-                .AddMembers(
-                    NamespaceDeclaration(IdentifierName(RosalinaSettings.instance.Namespace))
-                    .AddMembers(@class)
-                )
-                .NormalizeWhitespace()
-                .ToFullString();
-        }
-
+        var compilationUnit = CompilationUnit().AddUsings(
+            UsingDirective(IdentifierName("UnityEngine")),
+            UsingDirective(IdentifierName("UnityEngine.UIElements"))
+        );
+            
+        var code = RosalinaGeneratorHelper.Generate(compilationUnit, classDeclaration);
         return new RosalinaGenerationResult(code);
     }
 

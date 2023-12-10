@@ -21,27 +21,23 @@ internal sealed class RosalinaComponentBindingsGenerator : IRosalinaCodeGenearto
         PropertyDeclarationSyntax[] propertyStatements = statements.Select(x => x.Property).ToArray();
         StatementSyntax[] initializationStatements = statements.Select(x => x.Statement).ToArray();
 
-        CompilationUnitSyntax compilationUnit = CompilationUnit()
+        var compilationUnit = CompilationUnit()
             .AddUsings(
                 UsingDirective(IdentifierName("UnityEditor")),
                 UsingDirective(IdentifierName("UnityEngine")),
                 UsingDirective(IdentifierName("UnityEngine.UIElements"))
-            )
-            .AddMembers(
-                ClassDeclaration(document.Name)
-                    .AddModifiers(
-                        Token(SyntaxKind.PublicKeyword),
-                        Token(SyntaxKind.PartialKeyword)
-                    )
-                    .AddMembers(propertyStatements)
-                    .AddMembers(CreateRootElementProperty())
-                    .AddMembers(CreateConstructor(document.Name, initializationStatements))
             );
 
-        string code = compilationUnit
-            .NormalizeWhitespace()
-            .ToFullString();
-
+        var classDeclaration = ClassDeclaration(document.Name)
+            .AddModifiers(
+                Token(SyntaxKind.PublicKeyword),
+                Token(SyntaxKind.PartialKeyword)
+            )
+            .AddMembers(propertyStatements)
+            .AddMembers(CreateRootElementProperty())
+            .AddMembers(CreateConstructor(document.Name, initializationStatements));
+        
+        var code = RosalinaGeneratorHelper.Generate(compilationUnit, classDeclaration);
         return new RosalinaGenerationResult(code);
     }
 

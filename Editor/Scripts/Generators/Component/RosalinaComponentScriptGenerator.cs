@@ -20,19 +20,15 @@ internal sealed class RosalinaComponentScriptGenerator : IRosalinaCodeGeneartor
                 UsingDirective(IdentifierName("UnityEditor")),
                 UsingDirective(IdentifierName("UnityEngine")),
                 UsingDirective(IdentifierName("UnityEngine.UIElements"))
-            )
-            .AddMembers(
-                ClassDeclaration(documentAsset.Name)
-                    .AddModifiers(
-                        Token(SyntaxKind.PublicKeyword),
-                        Token(SyntaxKind.PartialKeyword)
-                    )
             );
-
-        string code = compilationUnit
-            .NormalizeWhitespace()
-            .ToFullString();
-
+            
+        ClassDeclarationSyntax classDeclaration = ClassDeclaration(documentAsset.Name)
+            .AddModifiers(
+                Token(SyntaxKind.PublicKeyword),
+                Token(SyntaxKind.PartialKeyword)
+            );
+        
+        var code = RosalinaGeneratorHelper.Generate(compilationUnit, classDeclaration);
         return new RosalinaGenerationResult(code, includeHeader: false);
     }
 }
