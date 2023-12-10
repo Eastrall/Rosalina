@@ -18,7 +18,7 @@ internal class RosalinaDocumentScriptGenerator : IRosalinaCodeGeneartor
             throw new ArgumentNullException(nameof(documentAsset), "Cannot generate binding with a null document asset.");
         }
 
-        ClassDeclarationSyntax @class = ClassDeclaration(documentAsset.Name)
+        ClassDeclarationSyntax classDeclaration = ClassDeclaration(documentAsset.Name)
            .AddModifiers(Token(SyntaxKind.PublicKeyword))
            .AddModifiers(Token(SyntaxKind.PartialKeyword))
            .AddBaseListTypes(
@@ -37,14 +37,11 @@ internal class RosalinaDocumentScriptGenerator : IRosalinaCodeGeneartor
                     )
             );
 
-        string code = CompilationUnit()
-            .AddUsings(
-                UsingDirective(IdentifierName("UnityEngine"))
-            )
-            .AddMembers(@class)
-            .NormalizeWhitespace()
-            .ToFullString();
-
+        var compilationUnit = CompilationUnit().AddUsings(
+            UsingDirective(IdentifierName("UnityEngine"))
+        );
+            
+        var code = RosalinaGeneratorHelper.Generate(compilationUnit, classDeclaration);
         return new RosalinaGenerationResult(code, includeHeader: false);
     }
 }

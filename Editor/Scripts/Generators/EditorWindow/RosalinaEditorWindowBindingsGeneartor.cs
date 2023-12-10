@@ -25,52 +25,48 @@ internal class RosalinaEditorWindowBindingsGeneartor : IRosalinaCodeGeneartor
         PropertyDeclarationSyntax[] propertyStatements = statements.Select(x => x.Property).ToArray();
         StatementSyntax[] initializationStatements = statements.Select(x => x.Statement).ToArray();
 
-        CompilationUnitSyntax compilationUnit = CompilationUnit()
+        var compilationUnit = CompilationUnit()
             .AddUsings(
                 UsingDirective(IdentifierName("UnityEditor")),
                 UsingDirective(IdentifierName("UnityEngine")),
                 UsingDirective(IdentifierName("UnityEngine.UIElements"))
-            )
-            .AddMembers(
-                ClassDeclaration(document.Name)
-                    .AddModifiers(
-                        Token(SyntaxKind.PublicKeyword),
-                        Token(SyntaxKind.PartialKeyword)
-                    )
-                    .AddBaseListTypes(
-                        SimpleBaseType(
-                            ParseName(nameof(EditorWindow))
-                        )
-                    )
-                    .AddMembers(propertyStatements)
-                    .AddMembers(
-                        // public void CreateGUI() { ... }
-                        MethodDeclaration(ParseTypeName("void"), "CreateGUI")
-                            .AddModifiers(Token(SyntaxKind.PublicKeyword))
-                            .WithBody(
-                                Block(
-                                    new[]
-                                    {
-                                         CreateVisualTreeAssetVariable(document.FullPath),
-                                         CreateVisualElementVariable(),
-                                         AddVisualElementToRootElement()
-                                    }
-                                    .Concat(initializationStatements)
-                                    .Append(CallOnCreateGUIMethod())
-                                )
-                            ),
-
-                        // partial void OnCreateGUI();
-                        MethodDeclaration(ParseTypeName("void"), OnCreateGUIHookName)
-                            .AddModifiers(Token(SyntaxKind.PartialKeyword))
-                            .WithSemicolonToken(Token(SyntaxKind.SemicolonToken))
-                    )
             );
+            
+        var classDeclaration = ClassDeclaration(document.Name)
+            .AddModifiers(
+                Token(SyntaxKind.PublicKeyword),
+                Token(SyntaxKind.PartialKeyword)
+            )
+            .AddBaseListTypes(
+                SimpleBaseType(
+                    ParseName(nameof(EditorWindow))
+                )
+            )
+            .AddMembers(propertyStatements)
+            .AddMembers(
+                // public void CreateGUI() { ... }
+                MethodDeclaration(ParseTypeName("void"), "CreateGUI")
+                    .AddModifiers(Token(SyntaxKind.PublicKeyword))
+                    .WithBody(
+                        Block(
+                            new[]
+                                {
+                                    CreateVisualTreeAssetVariable(document.FullPath),
+                                    CreateVisualElementVariable(),
+                                    AddVisualElementToRootElement()
+                                }
+                                .Concat(initializationStatements)
+                                .Append(CallOnCreateGUIMethod())
+                        )
+                    ),
 
-        string code = compilationUnit
-            .NormalizeWhitespace()
-            .ToFullString();
-
+                // partial void OnCreateGUI();
+                MethodDeclaration(ParseTypeName("void"), OnCreateGUIHookName)
+                    .AddModifiers(Token(SyntaxKind.PartialKeyword))
+                    .WithSemicolonToken(Token(SyntaxKind.SemicolonToken))
+            );
+    
+        var code = RosalinaGeneratorHelper.Generate(compilationUnit, classDeclaration);
         return new RosalinaGenerationResult(code);
     }
 

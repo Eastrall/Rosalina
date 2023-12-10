@@ -64,6 +64,8 @@ public class RosalinaSettingsProvider : SettingsProvider
             EditorGUI.BeginChangeCheck();
 
             _settings.IsEnabled = EditorGUILayout.Toggle("Is Enabled", _settings.IsEnabled);
+            _settings.Namespace = EditorGUILayout.TextField("NameSpace", _settings.Namespace);
+            _settings.GenerateFolder = EditorGUILayout.TextField("GenerateFolder", _settings.GenerateFolder);
             EditorGUILayout.LabelField("Files");
             _fileList.DoLayoutList();
 
